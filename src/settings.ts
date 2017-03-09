@@ -1,0 +1,1 @@
+export const srcRoot = __dirname
