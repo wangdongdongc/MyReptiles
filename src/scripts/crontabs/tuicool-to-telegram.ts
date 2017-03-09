@@ -1,7 +1,8 @@
-import {readHistorySync, writeHistorySync} from '../../modules/history'
-import {Mode, Message, sendMessage} from '../../modules/telegram'
-import {token, chat_id} from '../../assets/auth_telegram'
-import {Article, getRecentArticles} from '../../reptiles/tuicool'
+import { readHistorySync, writeHistorySync } from '../../modules/history'
+import { Mode, Message, sendMessage } from '../../modules/telegram'
+import { token, chat_id } from '../../assets/auth_telegram'
+import { Article, getRecentArticles } from '../../reptiles/tuicool'
+import { getBeijingDateStamp } from '../../modules/localization';
 import * as _ from 'underscore'
 
 const historyFile = 'tuicool-to-telegram.json'
@@ -29,6 +30,6 @@ export function task() {
             }
         }) // end forEach
         writeHistorySync(historyFile, history_queue)
-        console.log(`Finish Script: tuicool-to-telegram (crontab)`)
+        console.log(`${getBeijingDateStamp()} Finish Script: tuicool-to-telegram`)
     })
 }

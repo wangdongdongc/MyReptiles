@@ -25,7 +25,7 @@
 > 在脚本文件中 `followingUsers` 是脚本执行时，将会爬取的用户，脚本将逐一爬去这些知乎用户的动态，全部发送到指定的 Telegram Bot 中。
 
 ### 运行
-1. `npm install`
-2. 确保 `src/assets/` 完好
-3. `npm run test`
-4. `node build/crontab.js`
+1. 安装依赖 `npm install`
+2. 加密传输 `src/assets/`
+3. 运行测试 `npm run test`
+4. 启动脚本 `node build/crontab.js`

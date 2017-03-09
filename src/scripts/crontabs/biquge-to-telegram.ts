@@ -1,7 +1,8 @@
-import {readHistorySync, writeHistorySync} from '../../modules/history'
-import {Mode, Message, sendMessage} from '../../modules/telegram'
-import {token, chat_id} from '../../assets/auth_telegram'
-import {Novel, Chapter, getRecentChapters} from '../../reptiles/biquge'
+import { readHistorySync, writeHistorySync } from '../../modules/history'
+import { Mode, Message, sendMessage } from '../../modules/telegram'
+import { token, chat_id } from '../../assets/auth_telegram'
+import { Novel, Chapter, getRecentChapters } from '../../reptiles/biquge'
+import { getBeijingDateStamp } from '../../modules/localization';
 import * as _ from 'underscore'
 
 interface NovelInfo {
@@ -73,5 +74,5 @@ export function task() {
             writeHistorySync(novel.history.filename, history_queue)
         })
     })
-    console.log(`Finish Script: biquge-to-telegram (crontab)`)
+    console.log(`${getBeijingDateStamp()} Finish Script: biquge-to-telegram`)
 }

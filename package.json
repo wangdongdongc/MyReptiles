@@ -20,8 +20,9 @@
   },
   "scripts": {
     "test": "./node_modules/.bin/mocha -t 10000 build/test",
-    "crontab": "crontab -r;crontab -u root crontab",
-    "build": "./node_modules/.bin/tsc --sourcemap"
+    "build": "./node_modules/.bin/tsc --sourcemap",
+    "restart": "sudo /home/ubuntu/.local/bin/supervisorctl restart reptiles",
+    "log": "cat /var/log/supervisor/reptilestdout.log"
   },
   "keywords": [
     "reptile",

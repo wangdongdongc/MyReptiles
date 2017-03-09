@@ -1,7 +1,8 @@
-import {readHistorySync, writeHistorySync} from '../../modules/history'
-import {Mode, Message, sendMessage, Mail, sendMail} from '../../modules/telegram'
-import {token, chat_id} from '../../assets/auth_telegram'
-import {Blog, getBlogs, Tweet, getTweets} from '../../reptiles/yinwang'
+import { readHistorySync, writeHistorySync } from '../../modules/history'
+import { Mode, Message, sendMessage, Mail, sendMail } from '../../modules/telegram'
+import { token, chat_id } from '../../assets/auth_telegram'
+import { Blog, getBlogs, Tweet, getTweets } from '../../reptiles/yinwang'
+import { getBeijingDateStamp } from '../../modules/localization';
 import * as _ from 'underscore'
 
 const blogHistory = 'yinwang-to-telegram--blog.json'
@@ -37,6 +38,6 @@ export function task() {
             }
         })
         writeHistorySync(blogHistory, blogHistoryQueue)
-        console.log(`Finish Script: yinwang-to-telegram (crontab)`)
+        console.log(`${getBeijingDateStamp()} Finish Script: yinwang-to-telegram `)
     })
 }

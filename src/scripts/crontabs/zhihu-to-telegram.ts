@@ -2,6 +2,7 @@ import { readHistorySync, writeHistorySync } from '../../modules/history'
 import { Mode, Message, sendMessage } from '../../modules/telegram'
 import { token, chat_id } from '../../assets/auth_telegram'
 import { TYPE, User, Activity, getRecentActivities } from '../../reptiles/zhihu'
+import { getBeijingDateStamp } from '../../modules/localization';
 import * as _ from 'underscore'
 
 const historyFile = 'zhihu-to-telegram.json'
@@ -75,8 +76,8 @@ const followingUsers: User[] = [
 ]
 
 export function task() {
-    //每次 200ms 进行一次爬取
-    let intervalTime = 400
+    //每隔 1s 进行一次爬取
+    let intervalTime = 1000 /* ms */
     let i = 0;
     let handler = setInterval(() => {
         zhihu_to_telegram(followingUsers[i])
@@ -84,6 +85,7 @@ export function task() {
         if (i >= followingUsers.length)
             clearInterval(handler)
     }, intervalTime)
+    console.log(`${getBeijingDateStamp()} Finish Script: zhihu-to-telegram`)
 }
 
 /**
@@ -125,5 +127,4 @@ function zhihu_to_telegram(user: User) {
             writeHistorySync(user.historyFile, history_queue)
         }
     })
-    console.log(`Finish Script: zhihu-to-telegram (crontab)`)
 }
