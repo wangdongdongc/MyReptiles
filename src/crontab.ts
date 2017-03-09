@@ -14,8 +14,20 @@ namespace Interval {
     export const Day = 24 * Hour
 }
 
+
+(/**
+ * 启动时立即执行一次
+ */function firstExecute(){
+    biquge.task()
+    tuicool.task()
+    yinwang.task()
+    zhihu.task()
+    tsdm.task()
+})()
+
+
 /**
- * 每小时执行一次的任务
+ * 每小时执行一次
  */
 setInterval(function() {
     biquge.task()
@@ -26,8 +38,8 @@ setInterval(function() {
 
 
 /**
- * 每天执行一次的任务
+ * 每天执行一次
  */
 setInterval(function() {
     tsdm.task()
-}, 3 * Interval.Day)
+}, Interval.Day)
