@@ -1,8 +1,8 @@
-import * as biquge from './scripts/crontabs/biquge-to-telegram'
-import * as tsdm from './scripts/crontabs/tsdm-to-telegram'
-import * as tuicool from './scripts/crontabs/tuicool-to-telegram'
-import * as yinwang from './scripts/crontabs/yinwang-to-telegram'
-import * as zhihu from './scripts/crontabs/zhihu-to-telegram'
+import * as biquge from './scripts/biquge-to-telegram'
+import * as tsdm from './scripts/tsdm-to-telegram'
+import * as tuicool from './scripts/tuicool-to-telegram'
+import * as yinwang from './scripts/yinwang-to-telegram'
+import * as zhihu from './scripts/zhihu-to-telegram'
 
 /**
  * 定时

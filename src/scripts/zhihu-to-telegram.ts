@@ -1,8 +1,8 @@
-import { readHistorySync, writeHistorySync } from '../../modules/history'
-import { Mode, Message, sendMessage } from '../../modules/telegram'
-import { token, chat_id } from '../../assets/auth_telegram'
-import { TYPE, User, Activity, getRecentActivities } from '../../reptiles/zhihu'
-import { getBeijingDateStamp } from '../../modules/localization';
+import { readHistorySync, writeHistorySync } from '../modules/history'
+import { Mode, Message, sendMessage } from '../modules/telegram'
+import { token, chat_id } from '../assets/auth_telegram'
+import { TYPE, User, Activity, getRecentActivities } from '../reptiles/zhihu'
+import { getBeijingDateStamp } from '../modules/localization';
 import * as _ from 'underscore'
 
 const historyFile = 'zhihu-to-telegram.json'

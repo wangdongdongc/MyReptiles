@@ -1,1 +1,0 @@
-import './crontabs/tsdm-to-telegram' // 执行 tsdm-to-telegram 的脚本 (下同)

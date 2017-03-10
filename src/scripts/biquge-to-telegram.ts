@@ -1,8 +1,8 @@
-import { readHistorySync, writeHistorySync } from '../../modules/history'
-import { Mode, Message, sendMessage } from '../../modules/telegram'
-import { token, chat_id } from '../../assets/auth_telegram'
-import { Novel, Chapter, getRecentChapters } from '../../reptiles/biquge'
-import { getBeijingDateStamp } from '../../modules/localization';
+import { readHistorySync, writeHistorySync } from '../modules/history'
+import { Mode, Message, sendMessage } from '../modules/telegram'
+import { token, chat_id } from '../assets/auth_telegram'
+import { Novel, Chapter, getRecentChapters } from '../reptiles/biquge'
+import { getBeijingDateStamp } from '../modules/localization';
 import * as _ from 'underscore'
 
 interface NovelInfo {

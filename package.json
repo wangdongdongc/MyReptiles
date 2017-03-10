@@ -22,7 +22,11 @@
     "test": "./node_modules/.bin/mocha -t 10000 build/test",
     "build": "./node_modules/.bin/tsc --sourcemap",
     "restart": "sudo /home/ubuntu/.local/bin/supervisorctl restart reptiles",
-    "log": "cat /var/log/supervisor/reptilestdout.log"
+    "stop": "sudo /home/ubuntu/.local/bin/supervisorctl stop reptiles",
+    "start": "sudo /home/ubuntu/.local/bin/supervisorctl start reptiles",
+    "log": "cat /var/log/supervisor/reptilestdout.log",
+    "logerr": "cat /var/log/supervisor/reptilestderr.log",
+    "logsys": "cat /var/log/supervisor/supervisord.log"
   },
   "keywords": [
     "reptile",
