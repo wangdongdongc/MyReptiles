@@ -104,7 +104,8 @@ function zhihu_to_telegram(user: User) {
                 if (_.contains(history_queue, actID) ||
                     act.meta == '关注了问题') {
                     // ingore
-                } else {
+                } 
+                else {
                     // build message
                     let text = `*${user.name}* _${act.meta}_\n*${act.title}*\n${act.link}\n*${act.authorName}*\n${act.content}`
                     let mes: Message = {
@@ -112,12 +113,14 @@ function zhihu_to_telegram(user: User) {
                         text: text,
                         parse_mode: Mode.markdown
                     }
+
                     sendMessage(token.zhihu, mes, (err, res) => {
                         // error report
                         if (err) {
                             console.log(`#sendMessage fail: 知乎 @${user.name} ${act.meta} ${act.authorName} ${act.title}`);
                         }
                     })
+                    
                     // save history
                     if (history_queue.length >= maxHistory)
                         history_queue.shift()

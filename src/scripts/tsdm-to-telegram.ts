@@ -14,19 +14,22 @@ export function task() {
         let history_queue = readHistorySync(historyFile)
         _.forEach(novelList, (novel: LightNovel) => {
             if (_.contains(history_queue, novel.title)) {
-                //
-            } else {
+                //ignore
+            } 
+            else {
                 let text = `*${novel.tag}* ${novel.title}\n${novel.link}`
                 let mes: Message = {
                     chat_id: chat_id.me,
                     text: text,
                     parse_mode: Mode.markdown,
                 }
+
                 sendMessage(token.tsdm, mes, (err, res) => {
                     if (err) {
                         console.log(`#sendMessage fail: 天使动漫 ${novel.title}`);
                     }
                 })
+
                 if (history_queue.length >= maxHistory)
                     history_queue.shift()
                 history_queue.push(novel.title)

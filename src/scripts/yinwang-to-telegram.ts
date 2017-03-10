@@ -18,21 +18,27 @@ export function task() {
         let blogHistoryQueue = readHistorySync(blogHistory)
         _.forEach(blogList, (blog: Blog) => {
             if (_.contains(blogHistoryQueue, blog.title)) {
-                //
-            } else {
+                //ignore
+            } 
+            else {
                 let text = `${blog.title}\n${blog.url}`
                 let mes: Message = {
                     chat_id: chat_id.me,
                     text: text,
                     parse_mode: Mode.markdown
                 }
+
                 sendMessage(token.yinwang, mes, (err: Error, res) => {
-                    if (err) { console.log(`telegram#sendMessage fail: ${err.message}`) }
+                    if (err) { 
+                        console.log(`telegram#sendMessage fail: ${err.message}`) 
+                    }
                 })
+
                 if (blogHistoryQueue.length >= maxBlogHistory) {
                     let mail = new Mail('yinwang-to-telegram', 'getBlogs', `Blog历史已满:《${blog.title}》无法存储`, '需设置更大的 maxBlogHistory')
                     sendMail(mail)
-                } else {
+                } 
+                else {
                     blogHistoryQueue.push(blog.title)
                 }
             }

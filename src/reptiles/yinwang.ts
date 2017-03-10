@@ -38,13 +38,16 @@ export function getBlogs(callback: (err: Error, blogs: Blog[])=>void) {
     superagent
     .get(blogURL)
     .end((err, res) => {
-        if (err) callback(err, null)
+        if (err) {
+            callback(err, null)
+        }
         if (res.text.indexOf(identifier) == -1) {
             const time = new Date()
             const mail: Mail = new Mail('王垠', 'Error', '未获取正确的HTML', `${time.toString()}`)
             sendMail(mail)
             callback(new Error('王垠: 未获取正确的HTML'), null)
-        } else {
+        } 
+        else {
             let blogList: Blog[] = []
             let $ = cheerio.load(res.text)
             let list = $('li.list-group-item.title')

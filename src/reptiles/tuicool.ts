@@ -28,17 +28,21 @@ export function getRecentArticles(callback: (err: Error, articles: Article[])=>v
         .get('http://www.tuicool.com')
         .set(http_header)
         .end((err, res) => {
-            if (err) callback(err, null)
+            if (err) {
+                callback(err, null)
+            }
             if (res.text.indexOf(name) == -1) {
                 const time = new Date()
                 const mail: Mail = new Mail('推酷', 'Error', '未获取正确的HTML', `${time.toString()}`)
                 sendMail(mail)
                 callback(new Error('推酷: 未获取正确的HTML'), null)
-            } else {
+            } 
+            else {
                 let article_list: Article[] = []
                 // 解析 HTML 获取数据
                 let $ = cheerio.load(res.text) // res.text is HTML
                 let list = $('.single_fake')
+
                 _.forEach(list, (node) => {
                     let cnode = cheerio.load(node)
                     let article: Article = {
@@ -49,6 +53,7 @@ export function getRecentArticles(callback: (err: Error, articles: Article[])=>v
                     }
                     article_list.push(article)
                 })
+                
                 callback(null, article_list)
             }
         })

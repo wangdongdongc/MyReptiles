@@ -40,13 +40,16 @@ export function getRecentChapters(novel: Novel, callback: (err:Error, list: Chap
     superagent
         .get(novel.url)
         .end((err, res) => {
-            if (err) callback(err, null)
+            if (err) {
+                callback(err, null)
+            }
             if (res.text.indexOf(novel.name) == -1) {
                 const time = new Date()
                 const mail: Mail = new Mail('笔趣阁', 'Error', `未获取正确的HTML`, `《${novel.name}》\n${time.toString()}`)
                 sendMail(mail)
                 callback(new Error('笔趣阁: 未获取正确的HTML'), null)
-            } else {
+            } 
+            else {
                 let chapter_list: Chapter[] = []
                 // 解析 HTML 获取数据
                 let $ = cheerio.load(res.text)

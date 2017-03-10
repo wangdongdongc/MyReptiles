@@ -75,18 +75,22 @@ export function getRecentActivities(user: User, callback: (err: Error, list: Act
     .get(user.activity_page)
     .set(http_header)
     .end((err, res) => {
-        if (err) callback(err, null)
+        if (err) {
+            callback(err, null)
+        }
         // 验证页面是否正确
         if (res.text.indexOf(user.identifier) == -1) {
             const time = new Date()
             const mail: Mail = new Mail(`知乎动态@${user.name}`, 'Error', '未获取正确的HTML', `${time.toString()}`)
             sendMail(mail)
             callback(new Error(`知乎动态 @${user.name}: 未获取正确的HTML`), null)
-        } else {
+        } 
+        else {
             var act_list: Activity[] = []
             // 解析 HTML 获取数据
             var $ = cheerio.load(res.text)
             var list = $('div.zm-profile-section-item.zm-item.clearfix')
+            
             _.forEach(list, (item) => {
                 var node: CheerioStatic = cheerio.load(item)
                 // 获取 item 数据
