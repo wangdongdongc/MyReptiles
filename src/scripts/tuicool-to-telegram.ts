@@ -1,13 +1,18 @@
+import * as _ from 'underscore'
+
 import { readHistorySync, writeHistorySync } from '../modules/history'
 import { Mode, Message, sendMessage } from '../modules/telegram'
-import { token, chat_id } from '../assets/auth_telegram'
 import { Article, getRecentArticles } from '../reptiles/tuicool'
 import { getBeijingDateStamp } from '../modules/localization';
-import * as _ from 'underscore'
+
+import { token, chat_id } from '../assets/auth_telegram'
 
 const historyFile = 'tuicool-to-telegram.json'
 const maxHistory = 200
 
+/**
+ * 任务：将推酷网上最新的新闻发送至对应的 Bot
+ */
 export function task() {
     getRecentArticles((err: Error, artList: Article[]) => {
         if (err) { throw err }

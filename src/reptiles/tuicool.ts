@@ -1,8 +1,10 @@
 import * as superagent from 'superagent'
 import * as cheerio from 'cheerio'
 import * as _ from 'underscore'
-import { http_header, name } from '../assets/auth_tuicool'
+
 import { Mail, sendMail } from '../modules/telegram'
+
+import { http_header, name } from '../assets/auth_tuicool'
 
 /**
  * Article interface for tuicool#getRecentArticles()=>Article[]

@@ -1,12 +1,21 @@
-import * as assert from 'assert'
-
 import * as superagent from 'superagent'
 import * as cheerio from 'cheerio'
 import * as _ from 'underscore'
+
 import { Mail, sendMail } from '../modules/telegram'
+
 import { http_header } from '../assets/auth_zhihu'
 
-export const TYPE = {
+interface ActType {
+    '赞了X中文章': RegExp
+    '赞同了回答': RegExp
+    '回答了问题': RegExp
+    '赞了文章': RegExp
+    '关注了问题': RegExp
+    '在X中收藏了回答': RegExp
+    '在X中发布了文章': RegExp
+}
+const TYPE: ActType = {
     '赞了X中文章': new RegExp('赞了\ .+\ 中的文章'),
     '赞同了回答': new RegExp('赞同了回答'),
     '回答了问题': new RegExp('回答了问题'),
@@ -66,6 +75,53 @@ function getChildCheerioFromNode(parentNode: CheerioStatic, selector: string) {
 const zhihuPrefix = 'http://zhihu.com'
 
 /**
+ * 匹配 "文章" 相关的动态
+ * @param {CheerioStatic} node CheerioStatic node
+ * @param {Activity} act Activity object
+ * @param {RegExp} regx Regular expression for meta type
+ */
+function handleArticle(node: CheerioStatic, act: Activity, regx: RegExp) {
+    const old_meta = act.meta
+    const result = regx.exec(act.meta)
+    act.meta = result[0]
+    act.title = old_meta.substring(result.index + result[0].length, old_meta.length)
+    node = getChildCheerioFromNode(node, 'div.zm-item-feed.zm-item-post')
+    act.link = node('link').attr('href').trim()
+    act.authorName = node('a.author-link').text().trim()
+}
+
+/**
+ * 匹配 "回答" 相关的动态
+ * @param {CheerioStatic} node CheerioStatic node
+ * @param {Activity} act Activity object
+ * @param {RegExp} regx Regular expression for meta type
+ */
+function handleAnswer(node: CheerioStatic, act: Activity, regx: RegExp) {
+    const old_meta = act.meta
+    const result = regx.exec(act.meta)
+    act.meta = result[0]
+    act.title = old_meta.substring(result.index + result[0].length, old_meta.length)
+    node = cheerio.load(node.html())
+    act.authorName = node('div.zm-item-rich-text').attr('data-author-name').trim()
+    act.link = zhihuPrefix + node('div.zm-item-rich-text').attr('data-entry-url').trim()
+}
+
+/**
+ * 匹配 "问题" 相关的动态
+ * @param {CheerioStatic} node CheerioStatic node
+ * @param {Activity} act Activity object
+ * @param {RegExp} regx Regular expression for meta type
+ */
+function handleQuestion(node: CheerioStatic, act: Activity, regx: RegExp) {
+    const old_meta = act.meta
+    const result = regx.exec(act.meta)
+    act.meta = result[0]
+    act.title = old_meta.substring(result.index + result[0].length, old_meta.length)
+    act.link = ''
+    act.authorName = ''
+}
+
+/**
  * 获取知乎用户最近动态
  * 
  * @export
@@ -103,71 +159,31 @@ export function getRecentActivities(user: User, callback: (err: Error, list: Act
                         authorName: null, // Todo
                         content: node('div.zh-summary.summary.clearfix').text()     // Todo
                     }
+
                     act.meta = removeLineBreak(act.meta)
                     act.content = removeLineBreak(act.content)
 
                     // 处理 meta (RegExp)
                     if (TYPE.赞了X中文章.exec(act.meta) != null) {
-                        const old_meta = act.meta
-                        const result = TYPE.赞了X中文章.exec(act.meta)
-                        act.meta = result[0]
-                        act.title = old_meta.substring(result.index + result[0].length, old_meta.length)
-                        node = getChildCheerioFromNode(node, 'div.zm-item-feed.zm-item-post')
-                        act.link = node('link').attr('href').trim()
-                        act.authorName = node('a.author-link').text().trim()
+                        handleArticle(node, act, TYPE.赞了X中文章)
                     }
                     else if (TYPE.赞了文章.exec(act.meta) != null) {
-                        const old_meta = act.meta
-                        const result = TYPE.赞了文章.exec(act.meta)
-                        act.meta = result[0]
-                        act.title = old_meta.substring(result.index + result[0].length, old_meta.length)
-                        node = getChildCheerioFromNode(node, 'div.zm-item-feed.zm-item-post')
-                        act.link = node('link').attr('href').trim()
-                        act.authorName = node('a.author-link').text().trim()
-                    }
-                    else if (TYPE.赞同了回答.exec(act.meta) != null) {
-                        const old_meta = act.meta
-                        const result = TYPE.赞同了回答.exec(act.meta)
-                        act.meta = result[0]
-                        act.title = old_meta.substring(result.index + result[0].length, old_meta.length)
-                        node = cheerio.load(node.html())
-                        act.authorName = node('div.zm-item-rich-text').attr('data-author-name').trim()
-                        act.link = zhihuPrefix + node('div.zm-item-rich-text').attr('data-entry-url').trim()
-                    }
-                    else if (TYPE.回答了问题.exec(act.meta) != null) {
-                        const old_meta = act.meta
-                        const result = TYPE.回答了问题.exec(act.meta)
-                        act.meta = result[0]
-                        act.title = old_meta.substring(result.index + result[0].length, old_meta.length)
-                        node = cheerio.load(node.html())
-                        act.authorName = node('div.zm-item-rich-text').attr('data-author-name').trim()
-                        act.link = zhihuPrefix + node('div.zm-item-rich-text').attr('data-entry-url').trim()
-                    }
-                    else if (TYPE.关注了问题.exec(act.meta) != null) {
-                        const old_meta = act.meta
-                        const result = TYPE.关注了问题.exec(act.meta)
-                        act.meta = result[0]
-                        act.title = old_meta.substring(result.index + result[0].length, old_meta.length)
-                        act.link = ''
-                        act.authorName = ''
-                    }
-                    else if (TYPE.在X中收藏了回答.exec(act.meta) != null) {
-                        const old_meta = act.meta
-                        const result = TYPE.在X中收藏了回答.exec(act.meta)
-                        act.meta = result[0]
-                        act.title = old_meta.substring(result.index + result[0].length, old_meta.length)
-                        node = cheerio.load(node.html())
-                        act.authorName = node('div.zm-item-rich-text').attr('data-author-name').trim()
-                        act.link = zhihuPrefix + node('div.zm-item-rich-text').attr('data-entry-url').trim()
+                        handleArticle(node, act, TYPE.赞了文章)
                     }
                     else if (TYPE.在X中发布了文章.exec(act.meta) != null) {
-                        const old_meta = act.meta
-                        const result = TYPE.在X中发布了文章.exec(act.meta)
-                        act.meta = result[0]
-                        act.title = old_meta.substring(result.index + result[0].length, old_meta.length)
-                        node = getChildCheerioFromNode(node, 'div.zm-item-feed.zm-item-post')
-                        act.link = node('link').attr('href').trim()
-                        act.authorName = node('a.author-link').text().trim()
+                        handleArticle(node, act, TYPE.在X中发布了文章)
+                    }
+                    else if (TYPE.赞同了回答.exec(act.meta) != null) {
+                        handleAnswer(node, act, TYPE.赞同了回答)
+                    }
+                    else if (TYPE.回答了问题.exec(act.meta) != null) {
+                        handleAnswer(node, act, TYPE.回答了问题)
+                    }
+                    else if (TYPE.在X中收藏了回答.exec(act.meta) != null) {
+                        handleAnswer(node, act, TYPE.在X中收藏了回答)
+                    }
+                    else if (TYPE.关注了问题.exec(act.meta) != null) {
+                        handleQuestion(node, act, TYPE.关注了问题)
                     }
                     else {
                         act.meta = null
@@ -198,8 +214,11 @@ export function getRecentActivities(user: User, callback: (err: Error, list: Act
                         act.content.length - act.content.lastIndexOf('编辑于 昨天') == 12) {
                         act.content = act.content.substring(0, act.content.lastIndexOf('编辑于 昨天'))
                     }
-                    if (act.meta != null)
+
+                    if (act.meta != null) {
                         act_list.push(act)
+                    }
+
                 }) // end forEach node
                 callback(null, act_list)
             }
@@ -208,19 +227,19 @@ export function getRecentActivities(user: User, callback: (err: Error, list: Act
 
 
 /**
- * 仅用于调试:
- * 使用 node 执行改文件对应的 JS 文件
+ * @debug
+ * 仅当本文件对应的 JS 文件被 node 直接执行使, 该段代码生效
  */
 if (process.argv.length >= 2 &&
     process.argv[1].indexOf('build/reptiles/zhihu.js') != -1) {
     //node zhihu.js
-    let debugUser: User = {
+    let testUser: User = {
         name: '雾雨魔理沙',
         identifier: '雾雨魔理沙',
         activity_page: 'https://www.zhihu.com/people/marisa.moe/activities',
         historyFile: 'test_zhihu_reptile.json'
     }
-    getRecentActivities(debugUser, (err, list) => {
+    getRecentActivities(testUser, (err, list) => {
         console.log(`END`)
     })
 }

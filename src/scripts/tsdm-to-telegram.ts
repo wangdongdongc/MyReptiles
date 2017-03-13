@@ -1,13 +1,18 @@
+import * as _ from 'underscore'
+
 import { readHistorySync, writeHistorySync } from '../modules/history'
 import { Mode, Message, sendMessage } from '../modules/telegram'
-import { token, chat_id } from '../assets/auth_telegram'
 import { LightNovel, getRecentNovels } from '../reptiles/tsdm'
 import { getBeijingDateStamp } from '../modules/localization';
-import * as _ from 'underscore'
+
+import { token, chat_id } from '../assets/auth_telegram'
 
 const historyFile = 'tsdm-to-telegram.json'
 const maxHistory = 100
 
+/**
+ * 任务: 将天使动漫论坛"轻文社"的新帖子发送到相应 Bot
+ */
 export function task() {
     getRecentNovels((err: Error, novelList: LightNovel[]) => {
         if (err) { throw err }

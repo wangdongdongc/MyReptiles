@@ -1,15 +1,20 @@
+import * as _ from 'underscore'
+
 import { readHistorySync, writeHistorySync } from '../modules/history'
 import { Mode, Message, sendMessage, Mail, sendMail } from '../modules/telegram'
-import { token, chat_id } from '../assets/auth_telegram'
 import { Blog, getBlogs, Tweet, getTweets } from '../reptiles/yinwang'
 import { getBeijingDateStamp } from '../modules/localization';
-import * as _ from 'underscore'
+
+import { token, chat_id } from '../assets/auth_telegram'
 
 const blogHistory = 'yinwang-to-telegram--blog.json'
 const tweetHistory = 'yinwang-to-telegram--tweet.json'
 const maxBlogHistory = 300
 const maxTweetHistory = 1000
 
+/**
+ * 任务：将王垠的新博文发送至相应 Bot
+ */
 export function task() {
     getBlogs((err, blogList: Blog[]) => {
         if (err) {

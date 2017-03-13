@@ -1,8 +1,10 @@
 import * as superagent from 'superagent'
 import * as cheerio from 'cheerio'
 import * as _ from 'underscore'
-import {http_header} from '../assets/auth_tsdm'
+
 import {Mail, sendMail} from '../modules/telegram'
+
+import {http_header} from '../assets/auth_tsdm'
 
 /**
  * LightNovel interface for tsdm#getRecentNovels()=>LightNovel[]

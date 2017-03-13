@@ -1,17 +1,18 @@
-import { readHistorySync, writeHistorySync } from '../modules/history'
-import { Mode, Message, sendMessage } from '../modules/telegram'
-import { token, chat_id } from '../assets/auth_telegram'
-import { novels } from '../assets/biquge';
-import { Novel, NovelInfo, Chapter, getRecentChapters } from '../reptiles/biquge'
-import { getBeijingDateStamp } from '../modules/localization';
 import * as _ from 'underscore'
 
+import { readHistorySync, writeHistorySync } from '../modules/history'
+import { Mode, Message, sendMessage } from '../modules/telegram'
+import { Novel, NovelInfo, Chapter, getRecentChapters } from '../reptiles/biquge'
+import { getBeijingDateStamp } from '../modules/localization';
+
+import { token, chat_id } from '../assets/auth_telegram'
+import { followingNovels } from '../assets/biquge';
 
 /**
- * 爬取笔趣阁的小说并发送至 Telegram Bot
+ * 任务：将笔趣阁上新的小说章节发送至相应的 Bot
  */
 export function task() {
-    _.forEach(novels, (novelInfo: NovelInfo) => {
+    _.forEach(followingNovels, (novelInfo: NovelInfo) => {
 
         let novel: Novel = {
             name: novelInfo.name,

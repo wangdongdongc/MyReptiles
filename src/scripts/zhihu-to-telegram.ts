@@ -1,14 +1,19 @@
+import * as _ from 'underscore'
+
 import { readHistorySync, writeHistorySync } from '../modules/history'
 import { Mode, Message, sendMessage } from '../modules/telegram'
+import { User, Activity, getRecentActivities } from '../reptiles/zhihu'
+import { getBeijingDateStamp } from '../modules/localization';
+
 import { token, chat_id } from '../assets/auth_telegram'
 import { followingUsers } from '../assets/zhihu';
-import { TYPE, User, Activity, getRecentActivities } from '../reptiles/zhihu'
-import { getBeijingDateStamp } from '../modules/localization';
-import * as _ from 'underscore'
 
 const historyFile = 'zhihu-to-telegram.json'
 const maxHistory = 100
 
+/**
+ * 任务：将所有关注用户的新动态发送至相应 Bot
+ */
 export function task() {
     //每隔 1s 进行一次爬取
     let intervalTime = 1000 /* ms */
