@@ -1,8 +1,8 @@
 import * as superagent from 'superagent'
 import * as cheerio from 'cheerio'
 import * as _ from 'underscore'
-import {http_header, name} from '../assets/auth_tuicool'
-import {Mail, sendMail} from '../modules/telegram'
+import { http_header, name } from '../assets/auth_tuicool'
+import { Mail, sendMail } from '../modules/telegram'
 
 /**
  * Article interface for tuicool#getRecentArticles()=>Article[]
@@ -23,7 +23,7 @@ export interface Article {
  * @export
  * @param {fucntion} callback - callback function
  */
-export function getRecentArticles(callback: (err: Error, articles: Article[])=>void) {
+export function getRecentArticles(callback: (err: Error, articles: Article[]) => void) {
     superagent
         .get('http://www.tuicool.com')
         .set(http_header)
@@ -36,7 +36,7 @@ export function getRecentArticles(callback: (err: Error, articles: Article[])=>v
                 const mail: Mail = new Mail('推酷', 'Error', '未获取正确的HTML', `${time.toString()}`)
                 sendMail(mail)
                 callback(new Error('推酷: 未获取正确的HTML'), null)
-            } 
+            }
             else {
                 let article_list: Article[] = []
                 // 解析 HTML 获取数据
@@ -53,7 +53,7 @@ export function getRecentArticles(callback: (err: Error, articles: Article[])=>v
                     }
                     article_list.push(article)
                 })
-                
+
                 callback(null, article_list)
             }
         })

@@ -18,6 +18,12 @@ export interface Novel {
     }
 }
 
+export interface NovelInfo {
+    name: string
+    url: string
+    historyFile: string
+}
+
 /**
  * Chapter interface for biquge#getRecentChapters()=>Chapter[]
  * 
@@ -34,7 +40,7 @@ export interface Chapter {
  * 
  * @export
  * @param {Novel} novel
- * @param {(err:Error, list: Chapter[])=>void} callback
+ * @param {function(Error, Chapters)} callback
  */
 export function getRecentChapters(novel: Novel, callback: (err:Error, list: Chapter[])=>void) {
     superagent

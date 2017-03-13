@@ -1,38 +1,11 @@
 import { readHistorySync, writeHistorySync } from '../modules/history'
 import { Mode, Message, sendMessage } from '../modules/telegram'
 import { token, chat_id } from '../assets/auth_telegram'
-import { Novel, Chapter, getRecentChapters } from '../reptiles/biquge'
+import { novels } from '../assets/biquge';
+import { Novel, NovelInfo, Chapter, getRecentChapters } from '../reptiles/biquge'
 import { getBeijingDateStamp } from '../modules/localization';
 import * as _ from 'underscore'
 
-interface NovelInfo {
-    name: string
-    url: string
-    historyFile: string
-}
-
-const novels: NovelInfo[] = [
-    {
-        name: '裁决',
-        url: 'http://m.biquge.com/0_325/',
-        historyFile: 'biquge-to-telegram--cai_jue.json'
-    },
-    {
-        name: '赘婿',
-        url: 'http://m.biquge.com/0_285/',
-        historyFile: 'biquge-to-telegram--zhui_xu.json'
-    },
-    {
-        name: '五行天',
-        url: 'http://m.biquge.com/11_11298/',
-        historyFile: 'biquge-to-telegram--wu_xing_tian.json'
-    },
-    {
-        name: '萌娘神话世界',
-        url: 'http://m.biquge.com/35_35348/',
-        historyFile: 'biquge-to-telegram--meng_niang_shsj.json'
-    }
-]
 
 /**
  * 爬取笔趣阁的小说并发送至 Telegram Bot
