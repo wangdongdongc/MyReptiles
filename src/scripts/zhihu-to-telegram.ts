@@ -1,5 +1,3 @@
-import * as _ from 'underscore'
-
 import { readHistorySync, writeHistorySync } from '../modules/history'
 import { Mode, Message, sendMessage } from '../modules/telegram'
 import { User, Activity, getRecentActivities } from '../reptiles/zhihu'
@@ -24,7 +22,6 @@ export function task() {
         if (i >= followingUsers.length)
             clearInterval(handler)
     }, intervalTime)
-    console.log(`${getBeijingDateStamp()} Finish Script: zhihu-to-telegram`)
 }
 
 /**
@@ -34,39 +31,40 @@ export function task() {
 function zhihu_to_telegram(user: User) {
     getRecentActivities(user, (err, activities: Activity[]) => {
         if (err) {
-            console.log(`#getRecentActivities fail: ${err.message}`)
-        } else {
-            // load history
-            let history_queue = readHistorySync(user.historyFile)
-            _.forEach(activities, (act: Activity) => {
-                let actID: string = `${act.authorName}:${act.title}`
-                if (_.contains(history_queue, actID) ||
-                    act.meta == '关注了问题') {
-                    // ingore
-                }
-                else {
-                    // build message
-                    let text = `*${user.name}* _${act.meta}_\n*${act.title}*\n${act.link}\n*${act.authorName}*\n${act.content}`
-                    let mes: Message = {
-                        chat_id: chat_id.me,
-                        text: text,
-                        parse_mode: Mode.markdown
-                    }
-
-                    sendMessage(token.zhihu, mes, (err, res) => {
-                        // error report
-                        if (err) {
-                            console.log(`#sendMessage fail: 知乎 @${user.name} ${act.meta} ${act.authorName} ${act.title}`);
-                        }
-                    })
-
-                    // save history
-                    if (history_queue.length >= maxHistory)
-                        history_queue.shift()
-                    history_queue.push(actID)
-                }
-            }) // end for each activity
-            writeHistorySync(user.historyFile, history_queue)
+            console.error(`知乎#getRecentActivities fail: ${err.message}`)
+            return
         }
+
+        let history_queue = readHistorySync(user.historyFile)
+
+        for(let i = 0; i < activities.length; i++) {
+            let act = activities[i]
+            let actID: string = `${act.authorName}:${act.title}`
+
+            if (history_queue.indexOf(actID) != -1 ||
+                act.meta == '关注了问题') {
+                continue
+            }
+
+            // build message
+            let text = `*${user.name}* _${act.meta}_\n*${act.title}*\n${act.link}\n*${act.authorName}*\n${act.content}`
+            let mes: Message = {
+                chat_id: chat_id.me,
+                text: text,
+                parse_mode: Mode.markdown
+            }
+
+            sendMessage(token.zhihu, mes, (err, res) => {
+                if (err)
+                    console.error(`知乎#sendMessage fail: @${user.name} ${act.meta} ${act.authorName} ${act.title}`);
+            })
+
+            if (history_queue.length >= maxHistory)
+                history_queue.shift()
+            history_queue.push(actID)
+        }
+
+        writeHistorySync(user.historyFile, history_queue)
     })
+    console.log(`${getBeijingDateStamp()} Finish Script: zhihu-to-telegram @${user.name}`)
 }

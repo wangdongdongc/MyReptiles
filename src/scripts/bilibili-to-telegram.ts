@@ -14,7 +14,8 @@ const maxHistory = 100
 export function task() {
     getRecentFeeds((err, feeds) => {
         if (err) {
-            throw err;
+            console.error(`bilibili#getRecentFeeds fail: ${err.message}`)
+            return
         }
 
         let history_queue = readHistorySync(historyFile)
@@ -34,10 +35,12 @@ export function task() {
             }
 
             sendMessage(token.bilibili, mes, (err, res) => {
-                if (err) throw err
+                if (err)
+                    console.error(`bilibili#sendMessage fail: ${feed.title}`)
             })
             sendImage(token.bilibili, mes.chat_id, feed.pic, (err, res) => {
-                if (err) throw err
+                if (err)
+                    console.error(`bilibili#sendMessage fail: ${feed.title}`)
             })
 
             if (history_queue.length >= maxHistory)

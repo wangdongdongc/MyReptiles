@@ -1,5 +1,3 @@
-import * as _ from 'underscore'
-
 import { readHistorySync, writeHistorySync } from '../modules/history'
 import { Mode, Message, sendMessage } from '../modules/telegram'
 import { LightNovel, getRecentNovels } from '../reptiles/tsdm'
@@ -15,31 +13,36 @@ const maxHistory = 100
  */
 export function task() {
     getRecentNovels((err: Error, novelList: LightNovel[]) => {
-        if (err) { throw err }
+        if (err) { 
+            console.error(`tsdm#getRecentNovels fail: ${err.message}`)
+            return
+        }
         let history_queue = readHistorySync(historyFile)
-        _.forEach(novelList, (novel: LightNovel) => {
-            if (_.contains(history_queue, novel.title)) {
-                //ignore
-            } 
-            else {
-                let text = `*${novel.tag}* ${novel.title}\n${novel.link}`
-                let mes: Message = {
-                    chat_id: chat_id.me,
-                    text: text,
-                    parse_mode: Mode.markdown,
-                }
 
-                sendMessage(token.tsdm, mes, (err, res) => {
-                    if (err) {
-                        console.log(`#sendMessage fail: 天使动漫 ${novel.title}`);
-                    }
-                })
+        for (let i = 0; i < novelList.length; i++) {
+            let novel = novelList[i]
 
-                if (history_queue.length >= maxHistory)
-                    history_queue.shift()
-                history_queue.push(novel.title)
+            if (history_queue.indexOf(novel.title) != -1) {
+                continue
             }
-        })// end forEach
+
+            let text = `*${novel.tag}* ${novel.title}\n${novel.link}`
+            let mes: Message = {
+                chat_id: chat_id.me,
+                text: text,
+                parse_mode: Mode.markdown,
+            }
+
+            sendMessage(token.tsdm, mes, (err, res) => {
+                if (err)
+                    console.error(`#sendMessage fail: 天使动漫 ${novel.title}`);
+            })
+
+            if (history_queue.length >= maxHistory)
+                history_queue.shift()
+            history_queue.push(novel.title)
+        }
+
         writeHistorySync(historyFile, history_queue)
         console.log(`${getBeijingDateStamp()} Finish Script: tsdm-to-telegram`)
     })
