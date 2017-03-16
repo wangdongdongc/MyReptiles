@@ -33,10 +33,10 @@ export function task() {
                 disable_web_page_preview: false
             }
 
-            sendMessage(token.bot, mes, (err, res) => {
+            sendMessage(token.bilibili, mes, (err, res) => {
                 if (err) throw err
             })
-            sendImage(token.bot, mes.chat_id, feed.pic, (err, res) => {
+            sendImage(token.bilibili, mes.chat_id, feed.pic, (err, res) => {
                 if (err) throw err
             })
 
