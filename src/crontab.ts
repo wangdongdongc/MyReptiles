@@ -3,6 +3,7 @@ import * as tsdm from './scripts/tsdm-to-telegram'
 import * as tuicool from './scripts/tuicool-to-telegram'
 import * as yinwang from './scripts/yinwang-to-telegram'
 import * as zhihu from './scripts/zhihu-to-telegram'
+import * as bilibili from './scripts/bilibili-to-telegram';
 
 /**
  * 定时
@@ -23,6 +24,7 @@ namespace Interval {
     yinwang.task()
     zhihu.task()
     tsdm.task()
+    bilibili.task() //2017/3/16
 })()
 
 
@@ -34,6 +36,7 @@ setInterval(function() {
     tuicool.task()
     yinwang.task()
     zhihu.task()
+    bilibili.task()
 }, Interval.Hour)
 
 

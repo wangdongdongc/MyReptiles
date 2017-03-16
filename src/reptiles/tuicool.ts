@@ -10,7 +10,7 @@ import { http_header, name } from '../assets/auth_tuicool'
  * Article interface for tuicool#getRecentArticles()=>Article[]
  * 
  * @export
- * @interface Article
+ * @interface {Article}
  */
 export interface Article {
     'title': string

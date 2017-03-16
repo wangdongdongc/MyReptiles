@@ -3,10 +3,10 @@ import * as _ from 'underscore'
 import { readHistorySync, writeHistorySync } from '../modules/history'
 import { Mode, Message, sendMessage } from '../modules/telegram'
 import { Novel, NovelInfo, Chapter, getRecentChapters } from '../reptiles/biquge'
-import { getBeijingDateStamp } from '../modules/localization';
+import { getBeijingDateStamp } from '../modules/localization'
 
 import { token, chat_id } from '../assets/auth_telegram'
-import { followingNovels } from '../assets/biquge';
+import { followingNovels } from '../assets/biquge'
 
 /**
  * 任务：将笔趣阁上新的小说章节发送至相应的 Bot

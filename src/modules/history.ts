@@ -44,7 +44,7 @@ export function readHistorySync(filename: string): string[] {
 export function writeHistorySync(filename: string, history: string[]) {
     // step 1: read
     const file = path.join(historyRoot, filename)
-    // special case: file not exist
+    // file not exist
     if (!fs.existsSync(file)) {
         fs.appendFileSync(file, JSON.stringify({
             history: history

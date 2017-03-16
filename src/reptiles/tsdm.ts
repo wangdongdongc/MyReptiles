@@ -18,7 +18,7 @@ export interface LightNovel {
     tag: string
 }
 
-export const tsdmURL = "http://www.tsdm.me/"
+const tsdmURL = "http://www.tsdm.me/"
 
 /**
  * 获取天使动漫#轻文社上最新的小说(贴子)

@@ -3,7 +3,7 @@ import * as _ from 'underscore'
 import { readHistorySync, writeHistorySync } from '../modules/history'
 import { Mode, Message, sendMessage } from '../modules/telegram'
 import { LightNovel, getRecentNovels } from '../reptiles/tsdm'
-import { getBeijingDateStamp } from '../modules/localization';
+import { getBeijingDateStamp } from '../modules/localization'
 
 import { token, chat_id } from '../assets/auth_telegram'
 

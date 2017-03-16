@@ -3,7 +3,7 @@ import * as _ from 'underscore'
 import { readHistorySync, writeHistorySync } from '../modules/history'
 import { Mode, Message, sendMessage } from '../modules/telegram'
 import { Article, getRecentArticles } from '../reptiles/tuicool'
-import { getBeijingDateStamp } from '../modules/localization';
+import { getBeijingDateStamp } from '../modules/localization'
 
 import { token, chat_id } from '../assets/auth_telegram'
 
@@ -20,7 +20,7 @@ export function task() {
         _.forEach(artList, (article) => {
             if (_.contains(history_queue, article.title)) {
                 // ignore
-            } 
+            }
             else {
                 const mes: Message = {
                     chat_id: chat_id.me,

@@ -11,6 +11,7 @@
     "@types/superagent": "^2.0.36",
     "@types/underscore": "^1.7.36",
     "cheerio": "^0.22.0",
+    "jquery": "^3.1.1",
     "mocha": "^3.2.0",
     "should": "^11.1.1",
     "superagent": "^3.1.0",

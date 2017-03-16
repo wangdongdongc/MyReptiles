@@ -1,5 +1,5 @@
 import * as superagent from 'superagent'
-import {token, chat_id} from '../assets/auth_telegram'
+import { token, chat_id } from '../assets/auth_telegram'
 
 export const Mode = {
     'markdown': 'markdown',
@@ -13,7 +13,7 @@ export const Mode = {
  * @export
  * @interface Message
  */
-export interface Message{
+export interface Message {
     chat_id: number
     text: string
     parse_mode: string
@@ -29,7 +29,7 @@ export interface Message{
  * @export
  * @class Mail
  */
-export class Mail{
+export class Mail {
     from: string
     to: string
     title: string
@@ -47,14 +47,14 @@ export class Mail{
 
 
 /**
- * 向上指定的 bot 发送信息
+ * 向指定的 bot 发送信息
  * 
  * @export
  * @param {string} botToken
  * @param {Message} mes
  * @param {(err:any, res:any)=>void} callback
  */
-export function sendMessage(botToken: string, mes: Message, callback: (err:any, res:any)=>void) {
+export function sendMessage(botToken: string, mes: Message, callback: (err: any, res: any) => void) {
     const query: Message = {
         'chat_id': Math.floor(mes.chat_id),
         'text': mes.text,
@@ -66,6 +66,25 @@ export function sendMessage(botToken: string, mes: Message, callback: (err:any, 
     superagent
         .get(`https://api.telegram.org/bot${botToken}/sendMessage`)
         .query(query)
+        .end((err, res) => {
+            callback(err, res)
+        })
+}
+
+
+/**
+ * 向指定的 Bot 发送图片
+ * @param {string} botToken 
+ * @param {string} imageURL 
+ * @param {function} callback 
+ */
+export function sendImage(botToken: string, chat_id: number, imageURL: string, callback: (err, res) => void) {
+    superagent
+        .get(`https://api.telegram.org/bot${botToken}/sendPhoto`)
+        .query({
+            chat_id: chat_id,
+            photo: imageURL
+        })
         .end((err, res) => {
             callback(err, res)
         })
@@ -86,6 +105,6 @@ export function sendMail(mail: Mail, mailToken: string = token.mail) {
         'parse_mode': Mode.markdown
     }
     sendMessage(mailToken, message, (err, res) => {
-        if (err) {throw err}
+        if (err) { throw err }
     })
 }

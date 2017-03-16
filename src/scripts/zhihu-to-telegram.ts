@@ -3,10 +3,10 @@ import * as _ from 'underscore'
 import { readHistorySync, writeHistorySync } from '../modules/history'
 import { Mode, Message, sendMessage } from '../modules/telegram'
 import { User, Activity, getRecentActivities } from '../reptiles/zhihu'
-import { getBeijingDateStamp } from '../modules/localization';
+import { getBeijingDateStamp } from '../modules/localization'
 
 import { token, chat_id } from '../assets/auth_telegram'
-import { followingUsers } from '../assets/zhihu';
+import { followingUsers } from '../assets/zhihu'
 
 const historyFile = 'zhihu-to-telegram.json'
 const maxHistory = 100
