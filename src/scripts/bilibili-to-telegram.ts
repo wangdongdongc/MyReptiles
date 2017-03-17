@@ -1,6 +1,6 @@
 import * as telegram from '../modules/telegram'
-import { readHistorySync, writeHistorySync } from '../modules/history'
 import * as bilibili from '../reptiles/bilibili'
+import { readHistorySync, writeHistorySync } from '../modules/history'
 import { getBeijingDateStamp } from '../modules/localization'
 
 import { token, chat_id } from '../assets/auth_telegram'
@@ -27,18 +27,14 @@ export function task() {
                 continue
             }
 
-            let mes: telegram.Message = {
-                chat_id: chat_id.me,
-                text: bilibili.convertBBFeedToHTML(feed),
-                parse_mode: telegram.MessageMode.html,
-                disable_web_page_preview: false
-            }
+            let caption = `${feed.author}:${feed.title}`
 
-            telegram.sendMessage(token.bilibili, mes, (err, res) => {
-                if (err)
-                    console.error(`bilibili#sendMessage fail: ${feed.title}`)
-            })
-            telegram.sendImage(token.bilibili, mes.chat_id, feed.pic, (err, res) => {
+            telegram.sendImage({
+                bot_token: token.bilibili,
+                chat_id: chat_id.me,
+                photo_url: feed.pic,
+                caption: caption
+            }, (err, res) => {
                 if (err)
                     console.error(`bilibili#sendMessage fail: ${feed.title}`)
             })

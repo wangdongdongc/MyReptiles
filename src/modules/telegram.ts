@@ -56,7 +56,7 @@ export class Mail {
  * @param {(err:any, res:any)=>void} callback
  */
 export function sendMessage(botToken: string, mes: Message, callback: (err: any, res: any) => void) {
-    const query: Message = {
+    let query: Message = {
         'chat_id': Math.floor(mes.chat_id),
         'text': mes.text,
         'parse_mode': mes.parse_mode,
@@ -72,6 +72,15 @@ export function sendMessage(botToken: string, mes: Message, callback: (err: any,
         })
 }
 
+/**
+ * params interface for telegram.sendImage
+ */
+export interface ImageParams {
+    bot_token: string
+    chat_id: number
+    photo_url: string
+    caption: string
+}
 
 /**
  * 向指定的 Bot 发送图片
@@ -79,12 +88,13 @@ export function sendMessage(botToken: string, mes: Message, callback: (err: any,
  * @param {string} imageURL 
  * @param {function} callback 
  */
-export function sendImage(botToken: string, chat_id: number, imageURL: string, callback: (err, res) => void) {
+export function sendImage(params: ImageParams, callback: (err, res) => void) {
     superagent
-        .get(`https://api.telegram.org/bot${botToken}/sendPhoto`)
+        .get(`https://api.telegram.org/bot${params.bot_token}/sendPhoto`)
         .query({
-            chat_id: chat_id,
-            photo: imageURL
+            chat_id: params.chat_id,
+            photo: params.photo_url,
+            caption: params.caption
         })
         .end((err, res) => {
             callback(err, res)
