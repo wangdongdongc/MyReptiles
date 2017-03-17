@@ -1,6 +1,5 @@
 import * as superagent from 'superagent'
 import * as cheerio from 'cheerio'
-import * as _ from 'underscore'
 
 import { Mail, sendMail } from '../modules/telegram'
 
@@ -45,7 +44,9 @@ export function getRecentArticles(callback: (err: Error, articles: Article[]) =>
                 let $ = cheerio.load(res.text) // res.text is HTML
                 let list = $('.single_fake')
 
-                _.forEach(list, (node) => {
+                for (let i = 0; i < list.length; i++) {
+                    let node = list[i]
+
                     let cnode = cheerio.load(node)
                     let article: Article = {
                         "title": cnode('a.article-list-title').text().trim(),
@@ -54,7 +55,7 @@ export function getRecentArticles(callback: (err: Error, articles: Article[]) =>
                         "link": `http://tuicool.com${cnode('a.article-list-title').attr('href').trim()}`
                     }
                     article_list.push(article)
-                })
+                }
 
                 callback(null, article_list)
             }

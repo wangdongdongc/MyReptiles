@@ -1,6 +1,7 @@
 import * as path from 'path'
 import * as fs from 'fs'
-import {srcRoot} from '../settings'
+
+import { srcRoot } from '../settings'
 
 const dataRoot = path.join(srcRoot, 'data')
 const historyRoot = path.join(dataRoot, 'history')
@@ -14,7 +15,7 @@ if (!fs.existsSync(historyRoot))
  *  读取历史文件 (非异步)
  * 
  * @export
- * @param {string} filename
+ * @param {string} filename 文件名
  * @returns {string[]}
  */
 export function readHistorySync(filename: string): string[] {
@@ -37,9 +38,9 @@ export function readHistorySync(filename: string): string[] {
  * 将历史信息写入历史文件 (非异步)
  * 
  * @export
- * @param {string} filename
- * @param {string[]} history
- * @returns
+ * @param {string} filename 文件名
+ * @param {string[]} history 字符串数组
+ * @returns {string[]}
  */
 export function writeHistorySync(filename: string, history: string[]) {
     // step 1: read

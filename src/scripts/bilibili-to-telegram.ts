@@ -1,6 +1,6 @@
+import * as telegram from '../modules/telegram'
 import { readHistorySync, writeHistorySync } from '../modules/history'
-import { Mode, Message, sendMessage, sendImage } from '../modules/telegram'
-import { BBFeed, getRecentFeeds, convertBBFeedToHTML } from '../reptiles/bilibili'
+import * as bilibili from '../reptiles/bilibili'
 import { getBeijingDateStamp } from '../modules/localization'
 
 import { token, chat_id } from '../assets/auth_telegram'
@@ -12,7 +12,7 @@ const maxHistory = 100
  * 任务: 将 Bilibil 上的新动态发送到 Telegram
  */
 export function task() {
-    getRecentFeeds((err, feeds) => {
+    bilibili.getRecentFeeds((err, feeds) => {
         if (err) {
             console.error(`bilibili#getRecentFeeds fail: ${err.message}`)
             return
@@ -27,18 +27,18 @@ export function task() {
                 continue
             }
 
-            let mes: Message = {
+            let mes: telegram.Message = {
                 chat_id: chat_id.me,
-                text: convertBBFeedToHTML(feed),
-                parse_mode: Mode.html,
+                text: bilibili.convertBBFeedToHTML(feed),
+                parse_mode: telegram.MessageMode.html,
                 disable_web_page_preview: false
             }
 
-            sendMessage(token.bilibili, mes, (err, res) => {
+            telegram.sendMessage(token.bilibili, mes, (err, res) => {
                 if (err)
                     console.error(`bilibili#sendMessage fail: ${feed.title}`)
             })
-            sendImage(token.bilibili, mes.chat_id, feed.pic, (err, res) => {
+            telegram.sendImage(token.bilibili, mes.chat_id, feed.pic, (err, res) => {
                 if (err)
                     console.error(`bilibili#sendMessage fail: ${feed.title}`)
             })
@@ -61,7 +61,7 @@ export function task() {
 if (process.argv.length >= 2 &&
     process.argv[1].indexOf('build/scripts/bilibili-to-telegram.js') != -1) {
     //node bilibili-to-telegram.js
-    getRecentFeeds((err, list) => {
+    bilibili.getRecentFeeds((err, list) => {
         task()
         console.log(`END`)
     })

@@ -1,6 +1,6 @@
+import * as telegram from '../modules/telegram'
 import { readHistorySync, writeHistorySync } from '../modules/history'
-import { Mode, Message, sendMessage } from '../modules/telegram'
-import { LightNovel, getRecentNovels } from '../reptiles/tsdm'
+import * as tsdm from '../reptiles/tsdm'
 import { getBeijingDateStamp } from '../modules/localization'
 
 import { token, chat_id } from '../assets/auth_telegram'
@@ -12,7 +12,7 @@ const maxHistory = 100
  * 任务: 将天使动漫论坛"轻文社"的新帖子发送到相应 Bot
  */
 export function task() {
-    getRecentNovels((err: Error, novelList: LightNovel[]) => {
+    tsdm.getRecentNovels((err: Error, novelList: tsdm.LightNovel[]) => {
         if (err) { 
             console.error(`tsdm#getRecentNovels fail: ${err.message}`)
             return
@@ -27,13 +27,13 @@ export function task() {
             }
 
             let text = `*${novel.tag}* ${novel.title}\n${novel.link}`
-            let mes: Message = {
+            let mes: telegram.Message = {
                 chat_id: chat_id.me,
                 text: text,
-                parse_mode: Mode.markdown,
+                parse_mode: telegram.MessageMode.markdown,
             }
 
-            sendMessage(token.tsdm, mes, (err, res) => {
+            telegram.sendMessage(token.tsdm, mes, (err, res) => {
                 if (err)
                     console.error(`#sendMessage fail: 天使动漫 ${novel.title}`);
             })

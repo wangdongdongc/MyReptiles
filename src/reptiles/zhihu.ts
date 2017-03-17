@@ -1,6 +1,5 @@
 import * as superagent from 'superagent'
 import * as cheerio from 'cheerio'
-import * as _ from 'underscore'
 
 import { Mail, sendMail } from '../modules/telegram'
 
@@ -144,15 +143,18 @@ export function getRecentActivities(user: User, callback: (err: Error, list: Act
                 callback(new Error(`知乎动态 @${user.name}: 未获取正确的HTML`), null)
             }
             else {
-                var act_list: Activity[] = []
+                let act_list: Activity[] = []
                 // 解析 HTML 获取数据
-                var $ = cheerio.load(res.text)
-                var list = $('div.zm-profile-section-item.zm-item.clearfix')
+                let $ = cheerio.load(res.text)
+                let list = $('div.zm-profile-section-item.zm-item.clearfix')
 
-                _.forEach(list, (item) => {
-                    var node: CheerioStatic = cheerio.load(item)
+                for (let i = 0; i < list.length; i++) {
+                    //for each item
+                    let item = list[i]
+
+                    let node: CheerioStatic = cheerio.load(item)
                     // 获取 item 数据
-                    var act: Activity = {
+                    let act: Activity = {
                         meta: node('div.zm-profile-activity-page-item-main').text(),
                         title: null,     // Todo
                         link: null,     // Todo
@@ -218,8 +220,8 @@ export function getRecentActivities(user: User, callback: (err: Error, list: Act
                     if (act.meta != null) {
                         act_list.push(act)
                     }
+                }
 
-                }) // end forEach node
                 callback(null, act_list)
             }
         }) // end superagent

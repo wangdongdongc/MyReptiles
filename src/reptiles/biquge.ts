@@ -1,6 +1,5 @@
 import * as superagent from 'superagent'
 import * as cheerio from 'cheerio'
-import * as _ from 'underscore'
 
 import {Mail, sendMail} from '../modules/telegram'
 
@@ -62,7 +61,10 @@ export function getRecentChapters(novel: Novel, callback: (err:Error, list: Chap
                 let $ = cheerio.load(res.text)
                 // 获取 List
                 let list = cheerio.load($('ul.chapter').html())('li')
-                _.forEach(list, (item) => {
+
+                for (let i = 0; i < list.length; i++) {
+                    let item = list[i]
+
                     // 获取 node
                     let node = cheerio.load(item)
                     // 获取 item 数据
@@ -72,7 +74,8 @@ export function getRecentChapters(novel: Novel, callback: (err:Error, list: Chap
                     }
                     chapter.link = `http://m.biquge.com${chapter.link}`
                     chapter_list.push(chapter)
-                })
+                }
+                
                 callback(null, chapter_list)
             }
         })

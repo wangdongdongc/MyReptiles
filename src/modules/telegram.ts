@@ -1,7 +1,8 @@
 import * as superagent from 'superagent'
+
 import { token, chat_id } from '../assets/auth_telegram'
 
-export const Mode = {
+export const MessageMode = {
     'markdown': 'markdown',
     'html': 'html'
 }
@@ -102,7 +103,7 @@ export function sendMail(mail: Mail, mailToken: string = token.mail) {
     const message: Message = {
         'chat_id': chat_id.me,
         'text': mail.markdown,
-        'parse_mode': Mode.markdown
+        'parse_mode': MessageMode.markdown
     }
     sendMessage(mailToken, message, (err, res) => {
         if (err) { throw err }

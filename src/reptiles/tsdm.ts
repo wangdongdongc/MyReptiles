@@ -1,6 +1,5 @@
 import * as superagent from 'superagent'
 import * as cheerio from 'cheerio'
-import * as _ from 'underscore'
 
 import {Mail, sendMail} from '../modules/telegram'
 
@@ -47,9 +46,10 @@ export function getRecentNovels(callback: (err: Error, list: LightNovel[])=>void
                 let $ = cheerio.load(res.text)
                 // List
                 let list = $('tbody.tsdm_normalthread')
-                
-                _.forEach(list, (item) => {
-                    // Item
+
+                for (let i = 0; i < list.length; i++) {
+                    let item = list[i]
+
                     let node = cheerio.load(item)
                     let novel: LightNovel = {
                         title: node('a.xst').text().trim(),
@@ -60,8 +60,10 @@ export function getRecentNovels(callback: (err: Error, list: LightNovel[])=>void
                     if (!novel.link.startsWith(tsdmURL)) {
                         novel.link = `${tsdmURL}${novel.link}`
                     }
+
                     novel_list.push(novel)
-                })
+                }
+
                 callback(null, novel_list)
             }
         })

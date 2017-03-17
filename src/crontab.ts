@@ -23,8 +23,9 @@ namespace Interval {
     tuicool.task()
     yinwang.task()
     zhihu.task()
-    tsdm.task()
     bilibili.task() //2017/3/16
+    
+    tsdm.task()
 })()
 
 

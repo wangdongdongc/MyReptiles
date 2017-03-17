@@ -1,6 +1,6 @@
+import * as telegram from '../modules/telegram'
 import { readHistorySync, writeHistorySync } from '../modules/history'
-import { Mode, Message, sendMessage } from '../modules/telegram'
-import { Novel, NovelInfo, Chapter, getRecentChapters } from '../reptiles/biquge'
+import * as biquge from '../reptiles/biquge'
 import { getBeijingDateStamp } from '../modules/localization'
 
 import { token, chat_id } from '../assets/auth_telegram'
@@ -13,7 +13,7 @@ export function task() {
     for (let i = 0; i < followingNovels.length; i++) {
         let novelInfo = followingNovels[i]
 
-        let novel: Novel = {
+        let novel: biquge.Novel = {
             name: novelInfo.name,
             url: novelInfo.url,
             history: {
@@ -22,7 +22,7 @@ export function task() {
             }
         }
 
-        getRecentChapters(novel, (err, chapters: Chapter[]) => {
+        biquge.getRecentChapters(novel, (err, chapters: biquge.Chapter[]) => {
             if (err) {
                 console.error(`biquge#getRecentChapters(${novel.name}) fail: ${err.message}`)
                 return
@@ -38,13 +38,13 @@ export function task() {
                 }
 
                 let text = `*《${novel.name}》*更新了新章节\n[${chapter.title}](${chapter.link})`
-                let mes: Message = {
+                let mes: telegram.Message = {
                     chat_id: chat_id.me,
                     text: text,
-                    parse_mode: Mode.markdown
+                    parse_mode: telegram.MessageMode.markdown
                 }
 
-                sendMessage(token.biquge, mes, (err, res) => {
+                telegram.sendMessage(token.biquge, mes, (err, res) => {
                     if (err)
                         console.error(`biquge#sendMessage fail: 《${novel.name}》${chapter.title}`);
                 })

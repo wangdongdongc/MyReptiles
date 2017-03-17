@@ -1,6 +1,5 @@
 import * as superagent from 'superagent'
 import * as cheerio from 'cheerio'
-import * as _ from 'underscore'
 
 import {Mail, sendMail} from '../modules/telegram'
 
@@ -52,14 +51,19 @@ export function getBlogs(callback: (err: Error, blogs: Blog[])=>void) {
             let blogList: Blog[] = []
             let $ = cheerio.load(res.text)
             let list = $('li.list-group-item.title')
-            _.forEach(list, (item) => {
+
+            for (let i = 0; i < list.length; i++) {
+                let item = list[i]
+
                 let node = cheerio.load(item)
                 let blog: Blog = {
                     title: node('a').text().toString(),
                     url: node('a').attr('href').toString()
                 }
+
                 blogList.push(blog)
-            })
+            }
+
             callback(null, blogList)
         }
     })

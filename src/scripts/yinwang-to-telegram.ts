@@ -1,6 +1,6 @@
+import * as telegram from '../modules/telegram'
+import * as yinwang from '../reptiles/yinwang'
 import { readHistorySync, writeHistorySync } from '../modules/history'
-import { Mode, Message, sendMessage, Mail, sendMail } from '../modules/telegram'
-import { Blog, getBlogs, Tweet, getTweets } from '../reptiles/yinwang'
 import { getBeijingDateStamp } from '../modules/localization'
 
 import { token, chat_id } from '../assets/auth_telegram'
@@ -14,7 +14,7 @@ const maxTweetHistory = 1000
  * 任务：将王垠的新博文发送至相应 Bot
  */
 export function task() {
-    getBlogs((err, blogList: Blog[]) => {
+    yinwang.getBlogs((err, blogList: yinwang.Blog[]) => {
         if (err) {
             console.error(`yiwang#getBlogs fail: ${err.message}`)
             return
@@ -30,20 +30,20 @@ export function task() {
             }
 
             let text = `${blog.title}\n${blog.url}`
-            let mes: Message = {
+            let mes: telegram.Message = {
                 chat_id: chat_id.me,
                 text: text,
-                parse_mode: Mode.markdown
+                parse_mode: telegram.MessageMode.markdown
             }
 
-            sendMessage(token.yinwang, mes, (err: Error, res) => {
+            telegram.sendMessage(token.yinwang, mes, (err: Error, res) => {
                 if (err)
                     console.error(`yinwang#sendMessage fail: ${blog.title}`)
             })
 
             if (history_queue.length >= maxBlogHistory) {
-                let mail = new Mail('yinwang-to-telegram', 'getBlogs', `Blog历史已满:《${blog.title}》无法存储`, '需设置更大的 maxBlogHistory')
-                sendMail(mail)
+                let mail = new telegram.Mail('yinwang-to-telegram', 'getBlogs', `Blog历史已满:《${blog.title}》无法存储`, '需设置更大的 maxBlogHistory')
+                telegram.sendMail(mail)
             }
             else {
                 history_queue.push(blog.title)

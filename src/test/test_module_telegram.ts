@@ -1,11 +1,11 @@
-import {Mode, Message, sendMessage} from '../modules/telegram'
+import {MessageMode, Message, sendMessage} from '../modules/telegram'
 import {token, chat_id} from '../assets/auth_telegram'
 import 'should'
 
 let mes: Message = {
     'chat_id': chat_id.me,
     'text': '[hello](google.com)',
-    'parse_mode': Mode.markdown
+    'parse_mode': MessageMode.markdown
 }
 
 describe(`telegram: module`, () => {

@@ -1,6 +1,6 @@
+import * as telegram from '../modules/telegram'
+import * as zhihu from '../reptiles/zhihu'
 import { readHistorySync, writeHistorySync } from '../modules/history'
-import { Mode, Message, sendMessage } from '../modules/telegram'
-import { User, Activity, getRecentActivities } from '../reptiles/zhihu'
 import { getBeijingDateStamp } from '../modules/localization'
 
 import { token, chat_id } from '../assets/auth_telegram'
@@ -28,8 +28,8 @@ export function task() {
  * 获取单个用户的动态发送至 telegram
  *  note: 同时获取过多知乎用户动态会失败
  */
-function zhihu_to_telegram(user: User) {
-    getRecentActivities(user, (err, activities: Activity[]) => {
+function zhihu_to_telegram(user: zhihu.User) {
+    zhihu.getRecentActivities(user, (err, activities) => {
         if (err) {
             console.error(`知乎#getRecentActivities fail: ${err.message}`)
             return
@@ -48,13 +48,13 @@ function zhihu_to_telegram(user: User) {
 
             // build message
             let text = `*${user.name}* _${act.meta}_\n*${act.title}*\n${act.link}\n*${act.authorName}*\n${act.content}`
-            let mes: Message = {
+            let mes: telegram.Message = {
                 chat_id: chat_id.me,
                 text: text,
-                parse_mode: Mode.markdown
+                parse_mode: telegram.MessageMode.markdown
             }
 
-            sendMessage(token.zhihu, mes, (err, res) => {
+            telegram.sendMessage(token.zhihu, mes, (err, res) => {
                 if (err)
                     console.error(`知乎#sendMessage fail: @${user.name} ${act.meta} ${act.authorName} ${act.title}`);
             })

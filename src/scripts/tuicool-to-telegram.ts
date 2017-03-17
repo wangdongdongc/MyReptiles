@@ -1,6 +1,6 @@
+import * as telegram from '../modules/telegram'
 import { readHistorySync, writeHistorySync } from '../modules/history'
-import { Mode, Message, sendMessage } from '../modules/telegram'
-import { Article, getRecentArticles } from '../reptiles/tuicool'
+import * as tuicool from '../reptiles/tuicool'
 import { getBeijingDateStamp } from '../modules/localization'
 
 import { token, chat_id } from '../assets/auth_telegram'
@@ -12,7 +12,7 @@ const maxHistory = 200
  * 任务：将推酷网上最新的新闻发送至对应的 Bot
  */
 export function task() {
-    getRecentArticles((err: Error, artList: Article[]) => {
+    tuicool.getRecentArticles((err: Error, artList: tuicool.Article[]) => {
         if (err) { 
             console.error(`tuicool#getRecentArticles fail: ${err.message}`)
             return
@@ -27,13 +27,13 @@ export function task() {
                 continue
             }
 
-            let mes: Message = {
+            let mes: telegram.Message = {
                 chat_id: chat_id.me,
                 text: `*${article.title}*\n${article.link}\n${article.cut}`,
-                parse_mode: Mode.markdown,
+                parse_mode: telegram.MessageMode.markdown,
             }
 
-            sendMessage(token.tuibool, mes, (err, res) => {
+            telegram.sendMessage(token.tuibool, mes, (err, res) => {
                 if (err)
                     console.error(`tuicool#sendMessage fail: ${article.title}`)
             })
