@@ -1,7 +1,7 @@
-import * as telegram from '../modules/telegram'
 import * as bilibili from '../reptiles/bilibili'
-import { readHistorySync, writeHistorySync } from '../modules/history'
+import { HistoryFile } from '../modules/history'
 import { getBeijingDateStamp } from '../modules/localization'
+import { send_message_to_telegram, send_photo_to_telegram } from '../modules/rabbitmq-telegram'
 
 import { token, chat_id } from '../assets/auth_telegram'
 
@@ -18,33 +18,22 @@ export function task() {
             return
         }
 
-        let history_queue = readHistorySync(historyFile)
+        let history = new HistoryFile(historyFile, maxHistory)
 
         for (let i = 0; i < feeds.length; i++) {
             let feed = feeds[i]
 
-            if (history_queue.indexOf(feed.title) != -1) {
+            if (history.contain(feed.title)) 
                 continue
-            }
 
             let caption = `${feed.author}:${feed.title}`
 
-            telegram.sendImage({
-                bot_token: token.bilibili,
-                chat_id: chat_id.me,
-                photo_url: feed.pic,
-                caption: caption
-            }, (err, res) => {
-                if (err)
-                    console.error(`bilibili#sendMessage fail: ${feed.title}`)
-            })
+            send_photo_to_telegram(token.bilibili, chat_id.me, feed.pic, caption)
 
-            if (history_queue.length >= maxHistory)
-                history_queue.shift()
-            history_queue.push(`${feed.title}`)
+            history.push(feed.title)
         }
 
-        writeHistorySync(historyFile, history_queue)
+        history.save()
         console.log(`${getBeijingDateStamp()} Finish Script: bilibili-to-telegram`)
     })
 }

@@ -40,6 +40,7 @@ export function getBlogs(callback: (err: Error, blogs: Blog[])=>void) {
     .end((err, res) => {
         if (err) {
             callback(err, null)
+            return
         }
         if (res.text.indexOf(identifier) == -1) {
             const time = new Date()

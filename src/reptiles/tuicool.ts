@@ -31,6 +31,7 @@ export function getRecentArticles(callback: (err: Error, articles: Article[]) =>
         .end((err, res) => {
             if (err) {
                 callback(err, null)
+                return
             }
             if (res.text.indexOf(name) == -1) {
                 const time = new Date()

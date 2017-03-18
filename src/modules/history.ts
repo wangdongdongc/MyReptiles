@@ -59,3 +59,38 @@ export function writeHistorySync(filename: string, history: string[]) {
     fs.writeFileSync(file, JSON.stringify(data))
     return history
 }
+
+export class HistoryFile {
+    private filename: string
+    private max: number
+    private queue: string[]
+    constructor(filename: string, max: number) {
+        this.filename = filename
+        this.max = max
+        this.queue = readHistorySync(this.filename)
+    }
+
+    public contain(item: string): boolean {
+        return this.queue.indexOf(item) !== -1
+    }
+
+    public push(item: string) {
+        while (this.queue.length >= this.max)
+            this.queue.shift()
+        this.queue.push(item)
+    }
+
+    public save() {
+        writeHistorySync(this.filename, this.queue)
+    }
+}
+
+
+/**MAIN */
+if (process.argv.length >= 2 &&
+    process.argv[1].indexOf('build/modules/history.js') != -1) {
+    main(process.argv)
+}
+function main(argv: string[]) {
+    let file = new HistoryFile('test-moduel-history-HistoryFile.json', 3)
+}

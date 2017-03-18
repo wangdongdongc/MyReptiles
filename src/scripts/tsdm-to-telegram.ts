@@ -1,7 +1,7 @@
-import * as telegram from '../modules/telegram'
-import { readHistorySync, writeHistorySync } from '../modules/history'
 import * as tsdm from '../reptiles/tsdm'
+import { HistoryFile } from '../modules/history'
 import { getBeijingDateStamp } from '../modules/localization'
+import { send_message_to_telegram } from '../modules/rabbitmq-telegram'
 
 import { token, chat_id } from '../assets/auth_telegram'
 
@@ -17,33 +17,23 @@ export function task() {
             console.error(`tsdm#getRecentNovels fail: ${err.message}`)
             return
         }
-        let history_queue = readHistorySync(historyFile)
+
+        let history = new HistoryFile(historyFile, maxHistory)
 
         for (let i = 0; i < novelList.length; i++) {
             let novel = novelList[i]
 
-            if (history_queue.indexOf(novel.title) != -1) {
+            if (history.contain(novel.title))
                 continue
-            }
 
             let text = `*${novel.tag}* ${novel.title}\n${novel.link}`
-            let mes: telegram.Message = {
-                chat_id: chat_id.me,
-                text: text,
-                parse_mode: telegram.MessageMode.markdown,
-            }
 
-            telegram.sendMessage(token.tsdm, mes, (err, res) => {
-                if (err)
-                    console.error(`#sendMessage fail: 天使动漫 ${novel.title}`);
-            })
+            send_message_to_telegram(token.tsdm, chat_id.me, text)
 
-            if (history_queue.length >= maxHistory)
-                history_queue.shift()
-            history_queue.push(novel.title)
+            history.push(novel.title)
         }
 
-        writeHistorySync(historyFile, history_queue)
+        history.save()
         console.log(`${getBeijingDateStamp()} Finish Script: tsdm-to-telegram`)
     })
 }

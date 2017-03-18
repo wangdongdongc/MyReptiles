@@ -48,6 +48,7 @@ export function getRecentChapters(novel: Novel, callback: (err:Error, list: Chap
         .end((err, res) => {
             if (err) {
                 callback(err, null)
+                return
             }
             if (res.text.indexOf(novel.name) == -1) {
                 const time = new Date()

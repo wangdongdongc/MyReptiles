@@ -1,7 +1,7 @@
-import * as telegram from '../modules/telegram'
 import * as zhihu from '../reptiles/zhihu'
-import { readHistorySync, writeHistorySync } from '../modules/history'
+import { HistoryFile } from '../modules/history'
 import { getBeijingDateStamp } from '../modules/localization'
+import { send_message_to_telegram } from '../modules/rabbitmq-telegram'
 
 import { token, chat_id } from '../assets/auth_telegram'
 import { followingUsers } from '../assets/zhihu'
@@ -35,36 +35,23 @@ function zhihu_to_telegram(user: zhihu.User) {
             return
         }
 
-        let history_queue = readHistorySync(user.historyFile)
+        let history = new HistoryFile(user.historyFile, maxHistory)
 
         for(let i = 0; i < activities.length; i++) {
             let act = activities[i]
             let actID: string = `${act.authorName}:${act.title}`
 
-            if (history_queue.indexOf(actID) != -1 ||
-                act.meta == '关注了问题') {
+            if (history.contain(actID) || act.meta === '关注了问题')
                 continue
-            }
 
-            // build message
             let text = `*${user.name}* _${act.meta}_\n*${act.title}*\n${act.link}\n*${act.authorName}*\n${act.content}`
-            let mes: telegram.Message = {
-                chat_id: chat_id.me,
-                text: text,
-                parse_mode: telegram.MessageMode.markdown
-            }
 
-            telegram.sendMessage(token.zhihu, mes, (err, res) => {
-                if (err)
-                    console.error(`知乎#sendMessage fail: @${user.name} ${act.meta} ${act.authorName} ${act.title}`);
-            })
+            send_message_to_telegram(token.zhihu, chat_id.me, text)
 
-            if (history_queue.length >= maxHistory)
-                history_queue.shift()
-            history_queue.push(actID)
+            history.push(actID)
         }
 
-        writeHistorySync(user.historyFile, history_queue)
+        history.save()
     })
     console.log(`${getBeijingDateStamp()} Finish Script: zhihu-to-telegram @${user.name}`)
 }

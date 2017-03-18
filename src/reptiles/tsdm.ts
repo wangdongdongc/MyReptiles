@@ -32,6 +32,7 @@ export function getRecentNovels(callback: (err: Error, list: LightNovel[])=>void
         .end((err, res) => {
             if (err) {
                 callback(err, null)
+                return
             }
             if (res.text.indexOf('sssoa') == -1 ||
                 res.text.indexOf('轻文社') == -1) {

@@ -134,6 +134,7 @@ export function getRecentActivities(user: User, callback: (err: Error, list: Act
         .end((err, res) => {
             if (err) {
                 callback(err, null)
+                return
             }
             // 验证页面是否正确
             if (res.text.indexOf(user.identifier) == -1) {

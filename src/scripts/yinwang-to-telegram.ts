@@ -1,7 +1,7 @@
-import * as telegram from '../modules/telegram'
 import * as yinwang from '../reptiles/yinwang'
-import { readHistorySync, writeHistorySync } from '../modules/history'
+import { HistoryFile } from '../modules/history'
 import { getBeijingDateStamp } from '../modules/localization'
+import { send_message_to_telegram } from '../modules/rabbitmq-telegram'
 
 import { token, chat_id } from '../assets/auth_telegram'
 
@@ -20,37 +20,21 @@ export function task() {
             return
         }
 
-        let history_queue = readHistorySync(blogHistoryFile)
+        let history = new HistoryFile(blogHistoryFile, maxBlogHistory)
 
         for (let i = 0; i < blogList.length; i++) {
             let blog = blogList[i]
 
-            if (history_queue.indexOf(blog.title) != -1) {
+            if (history.contain(blog.title))
                 continue
-            }
 
             let text = `${blog.title}\n${blog.url}`
-            let mes: telegram.Message = {
-                chat_id: chat_id.me,
-                text: text,
-                parse_mode: telegram.MessageMode.markdown
-            }
+            send_message_to_telegram(token.yinwang, chat_id.me, text)
 
-            telegram.sendMessage(token.yinwang, mes, (err: Error, res) => {
-                if (err)
-                    console.error(`yinwang#sendMessage fail: ${blog.title}`)
-            })
-
-            if (history_queue.length >= maxBlogHistory) {
-                let mail = new telegram.Mail('yinwang-to-telegram', 'getBlogs', `Blog历史已满:《${blog.title}》无法存储`, '需设置更大的 maxBlogHistory')
-                telegram.sendMail(mail)
-            }
-            else {
-                history_queue.push(blog.title)
-            }
+            history.push(blog.title)
         }
 
-        writeHistorySync(blogHistoryFile, history_queue)
+        history.save()
         console.log(`${getBeijingDateStamp()} Finish Script: yinwang-to-telegram `)
     })
 }

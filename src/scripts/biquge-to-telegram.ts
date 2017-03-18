@@ -1,7 +1,7 @@
-import * as telegram from '../modules/telegram'
-import { readHistorySync, writeHistorySync } from '../modules/history'
 import * as biquge from '../reptiles/biquge'
+import { HistoryFile } from '../modules/history'
 import { getBeijingDateStamp } from '../modules/localization'
+import { send_message_to_telegram } from '../modules/rabbitmq-telegram'
 
 import { token, chat_id } from '../assets/auth_telegram'
 import { followingNovels } from '../assets/biquge'
@@ -28,33 +28,22 @@ export function task() {
                 return
             }
 
-            let history_queue = readHistorySync(novel.history.filename)
+            let history = new HistoryFile(novel.history.filename, novel.history.maxHistory)
 
             for (let j = 0; j < chapters.length; j++) {
                 let chapter = chapters[j]
 
-                if (history_queue.indexOf(chapter.title) != -1) {
+                if (history.contain(chapter.title))
                     continue
-                }
 
                 let text = `*《${novel.name}》*更新了新章节\n[${chapter.title}](${chapter.link})`
-                let mes: telegram.Message = {
-                    chat_id: chat_id.me,
-                    text: text,
-                    parse_mode: telegram.MessageMode.markdown
-                }
+                
+                send_message_to_telegram(token.biquge, chat_id.me, text)
 
-                telegram.sendMessage(token.biquge, mes, (err, res) => {
-                    if (err)
-                        console.error(`biquge#sendMessage fail: 《${novel.name}》${chapter.title}`);
-                })
-
-                if (history_queue.length >= novel.history.maxHistory)
-                    history_queue.shift()
-                history_queue.push(chapter.title)
+                history.push(chapter.title)
             }
 
-            writeHistorySync(novel.history.filename, history_queue)
+            history.save()
         })
     }
     console.log(`${getBeijingDateStamp()} Finish Script: biquge-to-telegram`)

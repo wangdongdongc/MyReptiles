@@ -4,6 +4,7 @@
   "description": "Personal reptiles for news aggregation",
   "main": "index.js",
   "dependencies": {
+    "amqplib": "^0.5.1",
     "cheerio": "^0.22.0",
     "mocha": "^3.2.0",
     "should": "^11.1.1",
@@ -11,6 +12,7 @@
     "typescript": "^2.1.4"
   },
   "devDependencies": {
+    "@types/amqplib": "^0.5.1",
     "@types/cheerio": "^0.17.31",
     "@types/mocha": "^2.2.33",
     "@types/node": "^0.0.1",
@@ -39,5 +41,9 @@
     "yinwang"
   ],
   "author": "Dongdong Wang",
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/wangdongdongc/MyReptiles"
+  },
   "license": "MIT"
 }

@@ -1,7 +1,7 @@
-import * as telegram from '../modules/telegram'
-import { readHistorySync, writeHistorySync } from '../modules/history'
 import * as tuicool from '../reptiles/tuicool'
+import { HistoryFile } from '../modules/history'
 import { getBeijingDateStamp } from '../modules/localization'
+import { send_message_to_telegram } from '../modules/rabbitmq-telegram'
 
 import { token, chat_id } from '../assets/auth_telegram'
 
@@ -18,32 +18,21 @@ export function task() {
             return
         }
 
-        let history_queue = readHistorySync(historyFile)
+        let history = new HistoryFile(historyFile, maxHistory)
 
         for (let i = 0; i < artList.length; i++) {
             let article = artList[i]
 
-            if (history_queue.indexOf(article.title) != -1) {
+            if (history.contain(article.title))
                 continue
-            }
 
-            let mes: telegram.Message = {
-                chat_id: chat_id.me,
-                text: `*${article.title}*\n${article.link}\n${article.cut}`,
-                parse_mode: telegram.MessageMode.markdown,
-            }
+            let text = `*${article.title}*\n${article.link}\n${article.cut}`
+            send_message_to_telegram(token.tuibool, chat_id.me, text)
 
-            telegram.sendMessage(token.tuibool, mes, (err, res) => {
-                if (err)
-                    console.error(`tuicool#sendMessage fail: ${article.title}`)
-            })
-
-            if (history_queue.length >= maxHistory)
-                history_queue.shift()
-            history_queue.push(article.title)
+            history.push(article.title)
         }
         
-        writeHistorySync(historyFile, history_queue)
+        history.save()
         console.log(`${getBeijingDateStamp()} Finish Script: tuicool-to-telegram`)
     })
 }
