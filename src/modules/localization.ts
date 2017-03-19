@@ -3,12 +3,12 @@
  * @return {Date} 北京时间
  */
 export function getBeijingDate() {
-    let d = new Date(),
-        localTime = d.getTime(),
-        localOffset = d.getTimezoneOffset() * 60000 //获得当地时间偏移的毫秒数
+    let d = new Date()
+    let localTime = d.getTime()
+    let localOffset = d.getTimezoneOffset() * 60000 // 获得当地时间偏移的毫秒数
 
-    let utc = localTime + localOffset, //utc即GMT时间
-        offset = 8; //北京(UTC+8)
+    let utc = localTime + localOffset // utc即GMT时间
+    let offset = 8 // 北京(UTC+8)
 
     let beijing = utc + (3600000 * offset)
     return new Date(beijing)

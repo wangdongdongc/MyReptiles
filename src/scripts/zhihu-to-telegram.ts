@@ -24,6 +24,11 @@ export function task() {
     }, intervalTime)
 }
 
+
+interface ZhihuActivityWithIdentifier extends zhihu.Activity {
+    identifier: string
+}
+
 /**
  * 获取单个用户的动态发送至 telegram
  *  note: 同时获取过多知乎用户动态会失败
@@ -39,30 +44,20 @@ function zhihu_to_telegram(user: zhihu.User) {
 
         activities
             .map((act) => {
-                //add identifier
-                act['ID'] = `${act.authorName}:${act.title}`
-                return act
+                //为每个动态条目添加标识符
+                (<ZhihuActivityWithIdentifier>act).identifier = `${act.authorName}:${act.title}`
+                return act as ZhihuActivityWithIdentifier
             })
             .filter((act) => {
-                return !history.contain(act['ID']) && act.meta !== '关注了问题'
+                return !history.contain(act.identifier) && act.meta !== '关注了问题'
             })
             .forEach((act) => {
                 let text = `*${user.name}* _${act.meta}_\n*${act.title}*\n${act.link}\n*${act.authorName}*\n${act.content}`
 
                 send_message_to_telegram(token.zhihu, chat_id.me, text)
 
-                history.push(act['ID'])
+                history.push(act.identifier)
             })
-
-        // for(let i = 0; i < activities.length; i++) {
-        //     let act = activities[i]
-        //     let actID: string = `${act.authorName}:${act.title}`
-
-        //     if (history.contain(actID) || act.meta === '关注了问题')
-        //         continue
-
-
-        // }
 
         history.save()
     })

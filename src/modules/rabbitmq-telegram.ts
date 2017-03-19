@@ -1,18 +1,20 @@
 import * as amqp from 'amqplib'
 
 import * as telegram from './telegram'
+import { getBeijingDateStamp } from './localization'
 
-import { token, chat_id } from '../assets/auth_telegram';
+import { token, chat_id } from '../assets/auth_telegram'
 
 const MSG_QUEUE = 'message-to-telegram'
 const UTF8 = 'utf8'
 
+/**telegram 短信的类型: PureMessage | PhotoMessage */
 export enum TelegramMessageType {
     PureMessage,
     PhotoMessage
 }
 
-interface TelegramMessage {
+abstract class TelegramMessage {
     TYPE: TelegramMessageType
     bot_token: string
     chat_id: number
@@ -22,17 +24,29 @@ interface TelegramMessage {
 }
 
 /**Telegram 纯文本短信 */
-export interface TelegramPureMessage extends TelegramMessage {
+export class TelegramPureMessage extends TelegramMessage {
     parse_mode: string
 }
 
 /**Telegram 图片短信 */
-export interface TelegramPhotoMessage extends TelegramMessage {
+export class TelegramPhotoMessage extends TelegramMessage {
     photo_url: string
 }
 
-class _SendMessage {
-    public forPureMessage(msg: TelegramPureMessage) {
+
+/**
+ * 使用 Telegram 发送短信
+ * 
+ * 应根据短信的类型选取不同的发送方法 (从而调用不同的 Telegram Bot API)
+ * 
+ * e.g. 发送图片短信 ``SendMessage.forPhotoMessage(photomsg)``
+ */
+namespace SendMessage {
+    /**
+     * 使用 Telegram 发送纯文本短信
+     * @param {TelegramPureMessage} msg 纯文本短信
+     */
+    export function forPureMessage(msg: TelegramPureMessage) {
         return new Promise((resolve, reject) => {
             telegram.sendMessage(msg.bot_token, {
                 chat_id: msg.chat_id,
@@ -48,7 +62,12 @@ class _SendMessage {
             })
         })
     }
-    public forPhotoMessage(msg: TelegramPhotoMessage) {
+
+    /**
+     * 使用 Telegram 发送图片短信
+     * @param {TelegramPhotoMessage} msg 图片短信
+     */
+    export function forPhotoMessage(msg: TelegramPhotoMessage) {
         return new Promise((resolve, reject) => {
             telegram.sendImage({
                 bot_token: msg.bot_token,
@@ -100,67 +119,85 @@ class TelegramWorker {
      * 处理队列中的消息
      */
     private handleMessages() {
-        amqp.connect('amqp://localhost').then(function (conn) {
-            return conn.createChannel()
-        }).then(function (ch) {
-            return ch.assertQueue(MSG_QUEUE).then(function (ok) {
-                ch.prefetch(TelegramWorker._prefetch) //最大并行数(消息发送)
-                return ch.consume(MSG_QUEUE, function (_msg) {
-                    if (_msg === null) {
-                        return
-                    }
-
-                    let message = <TelegramMessage>JSON.parse(_msg.content.toString(UTF8))
-
-                    if (message.resent_times >= TelegramWorker.MAX_RESENT_TIMES) {
-                        console.error(`发送失败超过3次, 放弃发送: ${message.content}`)
-                        return
-                    }
-
-                    let sent = (message.TYPE === TelegramMessageType.PureMessage) ?
-                        (new _SendMessage().forPureMessage(<TelegramPureMessage>message)) :
-                        (new _SendMessage().forPhotoMessage(<TelegramPhotoMessage>message))
-
-                    sent.then((res) => {
-                        //
-                    }).catch((err) => {
-                        //重发
-                        message.resent_times++
-                        ch.sendToQueue(MSG_QUEUE, new Buffer(JSON.stringify(message)))
-                    })
-                }, {noAck: true})
+        amqp
+            .connect('amqp://localhost').then(function (connection) {
+                return connection.createChannel()
             })
-        }).catch(console.error)
+            .then(function (channel) {
+                return channel.assertQueue(MSG_QUEUE).then(function (ok) {
+                    channel.prefetch(TelegramWorker._prefetch) //最大并行数(消息发送)
+                    return channel.consume(MSG_QUEUE, function (_msg) {
+                        if (_msg === null) {
+                            return
+                        }
+
+                        let message = <TelegramMessage>JSON.parse(_msg.content.toString(UTF8))
+
+                        if (message.resent_times >= TelegramWorker.MAX_RESENT_TIMES) {
+                            console.error(`发送失败超过3次, 放弃发送: ${message.content}`)
+                            return
+                        }
+
+                        let sent = (message.TYPE === TelegramMessageType.PureMessage) ?
+                            (SendMessage.forPureMessage(<TelegramPureMessage>message)) :
+                            (SendMessage.forPhotoMessage(<TelegramPhotoMessage>message))
+
+                        sent.then((res) => {
+                            //成功发送
+                        }).catch((err) => {
+                            //失败重发
+                            message.resent_times++
+                            channel.sendToQueue(MSG_QUEUE, new Buffer(JSON.stringify(message)))
+                        })
+                    }, { noAck: true }) //不使用 ack
+                })
+            })
+            .catch(console.error)
     }
 }
 
-
-export function send_message_to_telegram(token:string, chat_id:number, content:string, parse_mode:string = telegram.MessageMode.markdown) {
-    amqp.connect('amqp://localhost')
-    .then((connection) => {
-        return connection.createChannel()
-    }).then((channal) => {
-        return channal.assertQueue(MSG_QUEUE).then((ok) => {
-            let msg: TelegramPureMessage = {
-                TYPE: TelegramMessageType.PureMessage,
-                bot_token: token,
-                chat_id: chat_id,
-                content: content,
-                parse_mode: parse_mode,
-                resent_times: 0
-            }
-            return channal.sendToQueue(MSG_QUEUE, new Buffer(JSON.stringify(msg)), UTF8)
-        })
-    }).catch(console.error)
-}
-
-
-
-export function send_photo_to_telegram(token: string, chat_id:number, photo_url:string, caption:string) {
+/**
+ * send message to telegram bot
+ * @param {string} token telegram bot token
+ * @param {number} chat_id telegram chat_id
+ * @param {string} content 
+ * @param {string} parse_mode 'html' | 'markdonw'
+ */
+export function send_message_to_telegram(token: string, chat_id: number, content: string, parse_mode: string = telegram.MessageMode.markdown) {
     amqp.connect('amqp://localhost')
         .then((connection) => {
             return connection.createChannel()
-        }).then((channal) => {
+        })
+        .then((channal) => {
+            return channal.assertQueue(MSG_QUEUE).then((ok) => {
+                let msg: TelegramPureMessage = {
+                    TYPE: TelegramMessageType.PureMessage,
+                    bot_token: token,
+                    chat_id: chat_id,
+                    content: content,
+                    parse_mode: parse_mode,
+                    resent_times: 0
+                }
+                return channal.sendToQueue(MSG_QUEUE, new Buffer(JSON.stringify(msg)), UTF8)
+            })
+        })
+        .catch(console.error)
+}
+
+
+/**
+ * send photo to telegram bot
+ * @param {string} token telegram bot token
+ * @param {number} chat_id telegram chat_id
+ * @param {string} photo_url
+ * @param {string} caption caption of photo
+ */
+export function send_photo_to_telegram(token: string, chat_id: number, photo_url: string, caption: string) {
+    amqp.connect('amqp://localhost')
+        .then((connection) => {
+            return connection.createChannel()
+        })
+        .then((channal) => {
             return channal.assertQueue(MSG_QUEUE).then((ok) => {
                 let msg: TelegramPhotoMessage = {
                     TYPE: TelegramMessageType.PhotoMessage,
@@ -172,28 +209,14 @@ export function send_photo_to_telegram(token: string, chat_id:number, photo_url:
                 }
                 return channal.sendToQueue(MSG_QUEUE, new Buffer(JSON.stringify(msg)), UTF8)
             })
-        }).catch(console.error)
+        })
+        .catch(console.error)
 }
 
 
-
-function sendMessage(mes: string) {
-    let open = amqp.connect('amqp://localhost')
-
-    open.then(function (conn) {
-        return conn.createChannel()
-    }).then(function (ch) {
-        return ch.assertQueue(MSG_QUEUE).then(function (ok) {
-            let jsonObj: TelegramMessage = {
-                TYPE: TelegramMessageType.PureMessage,
-                bot_token: token.bot,
-                chat_id: chat_id.me,
-                content: mes,
-                resent_times: 0
-            }
-            return ch.sendToQueue(MSG_QUEUE, new Buffer(JSON.stringify(jsonObj), UTF8))
-        })
-    }).catch(console.warn)
+export function send_mail_to_telegram(from: string, title: string, content: string) {
+    let text = `*From*: ${from}\n*${title}*\n${content}\n${getBeijingDateStamp()}`
+    send_message_to_telegram(token.mail, chat_id.me, text)
 }
 
 
@@ -201,13 +224,6 @@ if (process.argv.length >= 2 && process.argv[1].indexOf('rabbitmq') != -1) {
     main(process.argv)
 }
 function main(argv: string[]) {
-    sendMessage('1')
-    sendMessage('2')
-    sendMessage('3')
-    sendMessage('4')
-    sendMessage('5')
-    sendMessage('6')
-    sendMessage('7')
-    sendMessage('8')
-    sendMessage('9')
+    send_mail_to_telegram('WDD', 'TEST', '测试一下')
+    console.log(`END`)
 }

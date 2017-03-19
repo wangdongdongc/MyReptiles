@@ -58,21 +58,19 @@ export function getRecentChapters(novel: Novel, callback: (err:Error, list: Chap
             } 
             else {
                 let chapter_list: Chapter[] = []
-                // 解析 HTML 获取数据
-                let $ = cheerio.load(res.text)
-                // 获取 List
-                let list = cheerio.load($('ul.chapter').html())('li')
 
+                let $ = cheerio.load(res.text)
+                let list = cheerio.load($('ul.chapter').html())('li')
+                
                 for (let i = 0; i < list.length; i++) {
                     let item = list[i]
 
-                    // 获取 node
                     let node = cheerio.load(item)
-                    // 获取 item 数据
                     let chapter: Chapter = {
                         'title': node('a').text().trim(),
                         'link': node('a').attr('href').trim()
                     }
+                    
                     chapter.link = `http://m.biquge.com${chapter.link}`
                     chapter_list.push(chapter)
                 }

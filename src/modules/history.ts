@@ -13,8 +13,6 @@ if (!fs.existsSync(historyRoot))
 
 /**
  *  读取历史文件 (非异步)
- * 
- * @export
  * @param {string} filename 文件名
  * @returns {string[]}
  */
@@ -36,8 +34,6 @@ function readHistoryFile(filename: string): string[] {
 
 /**
  * 将历史信息写入历史文件 (非异步)
- * 
- * @export
  * @param {string} filename 文件名
  * @param {string[]} history 字符串数组
  * @returns {string[]}
@@ -61,18 +57,16 @@ function writeHistoryFile(filename: string, history: string[]) {
 }
 
 /**
- * 以文件的方式存储历史记录
+ * 以文件对象的方式存储历史记录
+ * 
+ * ``let history = new HistoryFile(filename, maxItems)``
+ * @export
  */
 export class HistoryFile {
-    private filename: string
-    private max: number
-    private queue: string[]
-    
-    constructor(filename: string, max: number) {
-        this.filename = filename
-        this.max = max
-        this.queue = readHistoryFile(this.filename)
-    }
+    constructor(
+        private filename: string, 
+        private max: number, 
+        private queue: string[] = readHistoryFile(filename)) {}
 
     public contain(item: string): boolean {
         return this.queue.indexOf(item) !== -1
