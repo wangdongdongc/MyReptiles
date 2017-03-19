@@ -18,7 +18,7 @@ if (!fs.existsSync(historyRoot))
  * @param {string} filename 文件名
  * @returns {string[]}
  */
-export function readHistorySync(filename: string): string[] {
+function readHistoryFile(filename: string): string[] {
     const historyFile = path.join(historyRoot, filename)
     if (!fs.existsSync(historyFile)) {
         fs.appendFileSync(historyFile, JSON.stringify({
@@ -42,7 +42,7 @@ export function readHistorySync(filename: string): string[] {
  * @param {string[]} history 字符串数组
  * @returns {string[]}
  */
-export function writeHistorySync(filename: string, history: string[]) {
+function writeHistoryFile(filename: string, history: string[]) {
     // step 1: read
     const file = path.join(historyRoot, filename)
     // file not exist
@@ -60,14 +60,18 @@ export function writeHistorySync(filename: string, history: string[]) {
     return history
 }
 
+/**
+ * 以文件的方式存储历史记录
+ */
 export class HistoryFile {
     private filename: string
     private max: number
     private queue: string[]
+    
     constructor(filename: string, max: number) {
         this.filename = filename
         this.max = max
-        this.queue = readHistorySync(this.filename)
+        this.queue = readHistoryFile(this.filename)
     }
 
     public contain(item: string): boolean {
@@ -81,7 +85,7 @@ export class HistoryFile {
     }
 
     public save() {
-        writeHistorySync(this.filename, this.queue)
+        writeHistoryFile(this.filename, this.queue)
     }
 }
 

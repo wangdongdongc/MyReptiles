@@ -31,25 +31,38 @@ export function task() {
 function zhihu_to_telegram(user: zhihu.User) {
     zhihu.getRecentActivities(user, (err, activities) => {
         if (err) {
-            console.error(`知乎#getRecentActivities fail: ${err.message}`)
+            console.error(`知乎#getRecentActivities(${user.name}) fail: ${err.message}`)
             return
         }
 
         let history = new HistoryFile(user.historyFile, maxHistory)
 
-        for(let i = 0; i < activities.length; i++) {
-            let act = activities[i]
-            let actID: string = `${act.authorName}:${act.title}`
+        activities
+            .map((act) => {
+                //add identifier
+                act['ID'] = `${act.authorName}:${act.title}`
+                return act
+            })
+            .filter((act) => {
+                return !history.contain(act['ID']) && act.meta !== '关注了问题'
+            })
+            .forEach((act) => {
+                let text = `*${user.name}* _${act.meta}_\n*${act.title}*\n${act.link}\n*${act.authorName}*\n${act.content}`
 
-            if (history.contain(actID) || act.meta === '关注了问题')
-                continue
+                send_message_to_telegram(token.zhihu, chat_id.me, text)
 
-            let text = `*${user.name}* _${act.meta}_\n*${act.title}*\n${act.link}\n*${act.authorName}*\n${act.content}`
+                history.push(act['ID'])
+            })
 
-            send_message_to_telegram(token.zhihu, chat_id.me, text)
+        // for(let i = 0; i < activities.length; i++) {
+        //     let act = activities[i]
+        //     let actID: string = `${act.authorName}:${act.title}`
 
-            history.push(actID)
-        }
+        //     if (history.contain(actID) || act.meta === '关注了问题')
+        //         continue
+
+
+        // }
 
         history.save()
     })

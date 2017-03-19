@@ -22,17 +22,16 @@ export function task() {
 
         let history = new HistoryFile(blogHistoryFile, maxBlogHistory)
 
-        for (let i = 0; i < blogList.length; i++) {
-            let blog = blogList[i]
+        blogList
+            .filter((blog) => {
+                return !history.contain(blog.title)
+            })
+            .forEach((blog) => {
+                let text = `${blog.title}\n${blog.url}`
+                send_message_to_telegram(token.yinwang, chat_id.me, text)
 
-            if (history.contain(blog.title))
-                continue
-
-            let text = `${blog.title}\n${blog.url}`
-            send_message_to_telegram(token.yinwang, chat_id.me, text)
-
-            history.push(blog.title)
-        }
+                history.push(blog.title)
+            })
 
         history.save()
         console.log(`${getBeijingDateStamp()} Finish Script: yinwang-to-telegram `)

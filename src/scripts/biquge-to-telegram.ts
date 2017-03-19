@@ -10,8 +10,7 @@ import { followingNovels } from '../assets/biquge'
  * 任务：将笔趣阁上新的小说章节发送至相应的 Bot
  */
 export function task() {
-    for (let i = 0; i < followingNovels.length; i++) {
-        let novelInfo = followingNovels[i]
+    followingNovels.forEach((novelInfo) => {
 
         let novel: biquge.Novel = {
             name: novelInfo.name,
@@ -30,21 +29,19 @@ export function task() {
 
             let history = new HistoryFile(novel.history.filename, novel.history.maxHistory)
 
-            for (let j = 0; j < chapters.length; j++) {
-                let chapter = chapters[j]
-
-                if (history.contain(chapter.title))
-                    continue
-
-                let text = `*《${novel.name}》*更新了新章节\n[${chapter.title}](${chapter.link})`
-                
-                send_message_to_telegram(token.biquge, chat_id.me, text)
-
-                history.push(chapter.title)
-            }
+            chapters
+                .filter((chapter) => {
+                    return !history.contain(chapter.title)
+                })
+                .forEach((chapter) => {
+                    let text = `*《${novel.name}》*更新了新章节\n[${chapter.title}](${chapter.link})`
+                    send_message_to_telegram(token.biquge, chat_id.me, text)
+                    history.push(chapter.title)
+                })
 
             history.save()
         })
-    }
+    })
+
     console.log(`${getBeijingDateStamp()} Finish Script: biquge-to-telegram`)
 }

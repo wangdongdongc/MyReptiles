@@ -20,18 +20,15 @@ export function task() {
 
         let history = new HistoryFile(historyFile, maxHistory)
 
-        for (let i = 0; i < feeds.length; i++) {
-            let feed = feeds[i]
-
-            if (history.contain(feed.title)) 
-                continue
-
-            let caption = `${feed.author}:${feed.title}`
-
-            send_photo_to_telegram(token.bilibili, chat_id.me, feed.pic, caption)
-
-            history.push(feed.title)
-        }
+        feeds
+            .filter((feed) => {
+                return !history.contain(feed.title)
+            })
+            .forEach((feed) => {
+                let caption = `${feed.author}:${feed.title}`
+                send_photo_to_telegram(token.bilibili, chat_id.me, feed.pic, caption)
+                history.push(feed.title)
+            })
 
         history.save()
         console.log(`${getBeijingDateStamp()} Finish Script: bilibili-to-telegram`)
@@ -41,11 +38,9 @@ export function task() {
 
 /**
  * @debug
- * 仅当本文件对应的 JS 文件被 node 直接执行使, 该段代码生效
  */
 if (process.argv.length >= 2 &&
     process.argv[1].indexOf('build/scripts/bilibili-to-telegram.js') != -1) {
-    //node bilibili-to-telegram.js
     bilibili.getRecentFeeds((err, list) => {
         task()
         console.log(`END`)

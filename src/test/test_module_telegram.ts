@@ -4,7 +4,7 @@ import 'should'
 
 let mes: Message = {
     'chat_id': chat_id.me,
-    'text': '[hello](google.com)',
+    'text': `正在执行测试`,
     'parse_mode': MessageMode.markdown
 }
 

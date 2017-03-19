@@ -13,27 +13,33 @@ const maxHistory = 100
  */
 export function task() {
     tsdm.getRecentNovels((err: Error, novelList: tsdm.LightNovel[]) => {
-        if (err) { 
+        if (err) {
             console.error(`tsdm#getRecentNovels fail: ${err.message}`)
             return
         }
 
         let history = new HistoryFile(historyFile, maxHistory)
 
-        for (let i = 0; i < novelList.length; i++) {
-            let novel = novelList[i]
-
-            if (history.contain(novel.title))
-                continue
-
-            let text = `*${novel.tag}* ${novel.title}\n${novel.link}`
-
-            send_message_to_telegram(token.tsdm, chat_id.me, text)
-
-            history.push(novel.title)
-        }
+        novelList
+            .filter((novel) => {
+                return !history.contain(novel.title)
+            })
+            .forEach((novel) => {
+                let text = `*${novel.tag}* ${novel.title}\n${novel.link}`
+                send_message_to_telegram(token.tsdm, chat_id.me, text)
+                history.push(novel.title)
+            })
 
         history.save()
         console.log(`${getBeijingDateStamp()} Finish Script: tsdm-to-telegram`)
     })
+}
+
+
+/**
+ * @debug
+ */
+if (process.argv.length >= 2 &&
+    process.argv[1].indexOf('build/scripts/tsdm-to-telegram.js') != -1) {
+    task()
 }
