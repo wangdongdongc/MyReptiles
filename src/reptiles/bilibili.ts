@@ -1,21 +1,19 @@
 import * as superagent from 'superagent'
 
 import { Mail, sendMail } from '../modules/telegram'
-import { token } from '../assets/auth_telegram';
-import { http_header, bilibili_feed_url } from '../assets/auth_bilibili';
-import { getBeijingDateStamp } from '../modules/localization';
+import { send_mail_to_telegram } from '../modules/rabbitmq-telegram'
+import { token } from '../assets/auth_telegram'
+import { http_header, bilibili_feed_url } from '../assets/auth_bilibili'
+import { getBeijingDateStamp } from '../modules/localization'
 
 /**
  * Bilibili Feed Interface
  */
-export interface BBFeed {
+export interface IBBFeed {
     author: string
     title: string
-    /**brief instruction */
     description: string
-    /**cover image url */
     pic: string
-    /**link to video */
     link: string
 }
 
@@ -23,7 +21,7 @@ export interface BBFeed {
  * 将 bilibili 动态转换成 HTML格式的字符串
  * @param {BBFeed} feed bilibili 动态
  */
-export function convertBBFeedToHTML(feed: BBFeed): string {
+export function convertBBFeedToHTML(feed: IBBFeed): string {
     return `<i>${feed.author}\n</i><i>${feed.title}</i>`
 }
 
@@ -36,43 +34,46 @@ enum BBFeedType {
  * 获取 Bilibili 最新动态
  * @param {function} callback (err: Error, list: BBFeed[]) => void
  */
-export function getRecentFeeds(callback: (err: Error, list: BBFeed[]) => void) {
+export function getRecentFeeds(callback: (err: Error, list: IBBFeed[]) => void) {
     superagent
         .get(bilibili_feed_url)
         .set(http_header)
         .end((err, res) => {
             try {
-                let raw_data: string = err.rawResponse
-                let data: string = raw_data.substring('jQuery172043578431582043686_1489669341318('.length, raw_data.length-1)
+                if (!(err instanceof SyntaxError)) {
+                    send_mail_to_telegram('reptile: bilibili', '不正确的异常', err)
+                    return
+                }
+
+                let raw_data: string = (<any>err).rawResponse
+                
+                let data = raw_data.substring('jQuery172043578431582043686_1489669341318('.length, raw_data.length-1)
 
                 let json = JSON.parse(data)
 
                 let raw_feeds: Object[] = json.data.feeds
-                let feeds: BBFeed[] = []
+                let feeds: IBBFeed[] = []
 
-                for (let i = 0; i < raw_feeds.length; i++) {
-                    let rawFeed = raw_feeds[i]
-                    let newFeed: BBFeed
+                raw_feeds.forEach((rawFeed) => {
                     switch (<BBFeedType>rawFeed['type']) {
                         case BBFeedType.UP:
                         case BBFeedType.Bangumi:
-                            newFeed = {
+                            feeds.push({
                                 author: rawFeed['addition']['author'],
                                 title: rawFeed['addition']['title'],
                                 description: rawFeed['addition']['description'],
                                 pic: rawFeed['addition']['pic'],
                                 link: rawFeed['addition']['link']
-                            }
-                            feeds.push(newFeed)
-                            break
+                            })
+                            return
                         default:
                             sendMail(
                                 new Mail('Bilibili Feed', `未识别的Feed类型: ${rawFeed['type']}`, '', getBeijingDateStamp()),
                                 token.mail
                             )
-                            continue
+                            return
                     }
-                }
+                })
 
                 callback(null, feeds)
 
