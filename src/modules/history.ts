@@ -58,14 +58,14 @@ function writeHistoryFile(filename: string, history: string[]) {
 
 /**
  * 以文件对象的方式存储历史记录
- * 
+ *
  * ``let history = new HistoryFile(filename, maxItems)``
  * @export
  */
 export class HistoryFile {
     constructor(
-        private filename: string, 
-        private max: number, 
+        private filename: string,
+        private max: number,
         private queue: string[] = readHistoryFile(filename)) {}
 
     public contain(item: string): boolean {
@@ -90,5 +90,5 @@ if (process.argv.length >= 2 &&
     main(process.argv)
 }
 function main(argv: string[]) {
-    let file = new HistoryFile('test-moduel-history-HistoryFile.json', 3)
+    // let file = new HistoryFile('test-moduel-history-HistoryFile.json', 3)
 }

@@ -5,7 +5,7 @@ import {Mail, sendMail} from '../modules/telegram'
 
 /**
  * Tweet interface (yinwang)
- * 
+ *
  * @export
  * @interface Tweet
  */
@@ -17,7 +17,7 @@ export interface Tweet {
 
 /**
  * Blog interface (yinwang)
- * 
+ *
  * @export
  * @interface Blog
  */
@@ -26,15 +26,15 @@ export interface Blog {
     url: string
 }
 
-const tweetURL = 'http://www.yinwang.org/tweet.html'
+// const tweetURL = 'http://www.yinwang.org/tweet.html'
 const blogURL = 'http://www.yinwang.org/'
 const identifier = '当然我在扯淡'
 
-export function getTweets(callback: (err: Error, tweets: Tweet[])=>void) {
-
+export function getTweets(callback: (err: Error, tweets: Tweet[]) => void) {
+    // Todo
 }
 
-export function getBlogs(callback: (err: Error, blogs: Blog[])=>void) {
+export function getBlogs(callback: (err: Error, blogs: Blog[]) => void) {
     superagent
     .get(blogURL)
     .end((err, res) => {
@@ -47,7 +47,7 @@ export function getBlogs(callback: (err: Error, blogs: Blog[])=>void) {
             const mail: Mail = new Mail('王垠', 'Error', '未获取正确的HTML', `${time.toString()}`)
             sendMail(mail)
             callback(new Error('王垠: 未获取正确的HTML'), null)
-        } 
+        }
         else {
             let blogList: Blog[] = []
             let $ = cheerio.load(res.text)

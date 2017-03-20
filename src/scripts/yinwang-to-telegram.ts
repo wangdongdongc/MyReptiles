@@ -6,9 +6,9 @@ import { send_message_to_telegram } from '../modules/rabbitmq-telegram'
 import { token, chat_id } from '../assets/auth_telegram'
 
 const blogHistoryFile = 'yinwang-to-telegram--blog.json'
-const tweetHistoryFile = 'yinwang-to-telegram--tweet.json'
+// const tweetHistoryFile = 'yinwang-to-telegram--tweet.json'
 const maxBlogHistory = 300
-const maxTweetHistory = 1000
+// const maxTweetHistory = 1000
 
 /**
  * 任务：将王垠的新博文发送至相应 Bot

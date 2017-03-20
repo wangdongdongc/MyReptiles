@@ -7,7 +7,7 @@ import { http_header, name } from '../assets/auth_tuicool'
 
 /**
  * Article interface for tuicool#getRecentArticles()=>Article[]
- * 
+ *
  * @export
  * @interface {Article}
  */
@@ -20,7 +20,7 @@ export interface Article {
 
 /**
  * 获取推酷上面最新的文章
- * 
+ *
  * @export
  * @param {fucntion} callback - callback function
  */
@@ -50,10 +50,10 @@ export function getRecentArticles(callback: (err: Error, articles: Article[]) =>
 
                     let cnode = cheerio.load(node)
                     let article: Article = {
-                        "title": cnode('a.article-list-title').text().trim(),
-                        "cut": cnode('div.article_cut').text().trim(),
-                        "thumb": cnode('div.article_thumb').text().trim(),
-                        "link": `http://tuicool.com${cnode('a.article-list-title').attr('href').trim()}`
+                        'title': cnode('a.article-list-title').text().trim(),
+                        'cut': cnode('div.article_cut').text().trim(),
+                        'thumb': cnode('div.article_thumb').text().trim(),
+                        'link': `http://tuicool.com${cnode('a.article-list-title').attr('href').trim()}`
                     }
                     article_list.push(article)
                 }

@@ -1,7 +1,7 @@
 import * as bilibili from '../reptiles/bilibili'
 import { HistoryFile } from '../modules/history'
 import { getBeijingDateStamp } from '../modules/localization'
-import { send_message_to_telegram, send_photo_to_telegram } from '../modules/rabbitmq-telegram'
+import { send_photo_to_telegram } from '../modules/rabbitmq-telegram'
 
 import { token, chat_id } from '../assets/auth_telegram'
 

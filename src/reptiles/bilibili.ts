@@ -46,8 +46,8 @@ export function getRecentFeeds(callback: (err: Error, list: IBBFeed[]) => void) 
                 }
 
                 let raw_data: string = (<any>err).rawResponse
-                
-                let data = raw_data.substring('jQuery172043578431582043686_1489669341318('.length, raw_data.length-1)
+
+                let data = raw_data.substring('jQuery172043578431582043686_1489669341318('.length, raw_data.length - 1)
 
                 let json = JSON.parse(data)
 
@@ -93,7 +93,7 @@ export function getRecentFeeds(callback: (err: Error, list: IBBFeed[]) => void) 
  */
 if (process.argv.length >= 2 &&
     process.argv[1].indexOf('build/reptiles/bilibili.js') != -1) {
-    //node bilibili.js
+    // node bilibili.js
     getRecentFeeds((err, list) => {
         console.log(`get ${list.length} bilibili feeds`)
         console.log(`END`)

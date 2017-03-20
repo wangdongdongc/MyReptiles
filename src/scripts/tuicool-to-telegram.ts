@@ -27,7 +27,7 @@ export function task() {
             .forEach((article) => {
                 let text = `*${article.title}*\n${article.link}\n${article.cut}`
                 send_message_to_telegram(token.tuibool, chat_id.me, text)
-                
+
                 history.push(article.title)
             })
 

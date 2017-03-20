@@ -20,14 +20,14 @@ const TYPE: ActType = {
     '回答了问题': new RegExp('回答了问题'),
     '赞了文章': new RegExp('赞了文章'),
     '关注了问题': new RegExp('关注了问题'),
-    '在X中收藏了回答': new RegExp('在\ .+\ 中收藏了回答'), //2017/3/13
-    '在X中发布了文章': new RegExp('在\ .+\ 中发布了文章')  //2017/3/13
+    '在X中收藏了回答': new RegExp('在\ .+\ 中收藏了回答'), // 2017/3/13
+    '在X中发布了文章': new RegExp('在\ .+\ 中发布了文章')  // 2017/3/13
     // '发表了文章': new RegExp('发表了文章')
 }
 
 /**
  * User interface for zhihu#getRecentActivities(User)
- * 
+ *
  * @export
  * @interface User
  */
@@ -40,7 +40,7 @@ export interface User {
 
 /**
  * Activity interface for zhihu#getRecentActivities()=>Activity[]
- * 
+ *
  * @export
  * @interface Activity
  */
@@ -54,7 +54,7 @@ export interface Activity {
 
 /**
  * 去除字符串中的 "\n" 符号
- * 
+ *
  * @param {string} str - 可能包含"\n"的字符串
  * @returns - 不包含"\n"的字符串
  */
@@ -122,7 +122,7 @@ function handleQuestion(node: CheerioStatic, act: Activity, regx: RegExp) {
 
 /**
  * 获取知乎用户最近动态
- * 
+ *
  * @export
  * @param {User} user
  * @param {(err: Error, list: Activity[])=>void} callback
@@ -150,7 +150,7 @@ export function getRecentActivities(user: User, callback: (err: Error, list: Act
                 let list = $('div.zm-profile-section-item.zm-item.clearfix')
 
                 for (let i = 0; i < list.length; i++) {
-                    //for each item
+                    // for each item
                     let item = list[i]
 
                     let node: CheerioStatic = cheerio.load(item)
@@ -235,7 +235,7 @@ export function getRecentActivities(user: User, callback: (err: Error, list: Act
  */
 if (process.argv.length >= 2 &&
     process.argv[1].indexOf('build/reptiles/zhihu.js') != -1) {
-    //node zhihu.js
+    // node zhihu.js
     let testUser: User = {
         name: '雾雨魔理沙',
         identifier: '雾雨魔理沙',

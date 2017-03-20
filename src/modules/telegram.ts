@@ -10,7 +10,7 @@ export const MessageMode = {
 
 /**
  * Message interface for telegram#sendMessage(Message)
- * 
+ *
  * @export
  * @interface Message
  */
@@ -26,7 +26,7 @@ export interface Message {
 
 /**
  * Mail interface for telegram#sendMail(Mail)
- * 
+ *
  * @export
  * @class Mail
  */
@@ -49,7 +49,7 @@ export class Mail {
 
 /**
  * 向指定的 bot 发送信息
- * 
+ *
  * @export
  * @param {string} botToken
  * @param {Message} mes
@@ -84,9 +84,9 @@ export interface ImageParams {
 
 /**
  * 向指定的 Bot 发送图片
- * @param {string} botToken 
- * @param {string} imageURL 
- * @param {function} callback 
+ * @param {string} botToken
+ * @param {string} imageURL
+ * @param {function} callback
  */
 export function sendImage(params: ImageParams, callback: (err, res) => void) {
     superagent
@@ -104,7 +104,7 @@ export function sendImage(params: ImageParams, callback: (err, res) => void) {
 
 /**
  * 向 sssoa_mail_bot 发送邮件
- * 
+ *
  * @export
  * @param {Mail} mail
  * @param {string} [mailToken=token.mail]

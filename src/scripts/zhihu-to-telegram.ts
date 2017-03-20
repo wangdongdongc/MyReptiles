@@ -6,16 +6,15 @@ import { send_message_to_telegram } from '../modules/rabbitmq-telegram'
 import { token, chat_id } from '../assets/auth_telegram'
 import { followingUsers } from '../assets/zhihu'
 
-const historyFile = 'zhihu-to-telegram.json'
 const maxHistory = 100
 
 /**
  * 任务：将所有关注用户的新动态发送至相应 Bot
  */
 export function task() {
-    //每隔 1s 进行一次爬取
+    // 每隔 1s 进行一次爬取
     let intervalTime = 1000 /* ms */
-    let i = 0;
+    let i = 0
     let handler = setInterval(() => {
         zhihu_to_telegram(followingUsers[i])
         i = i + 1
@@ -44,7 +43,7 @@ function zhihu_to_telegram(user: zhihu.User) {
 
         activities
             .map((act) => {
-                //为每个动态条目添加标识符
+                // 为每个动态条目添加标识符
                 (<ZhihuActivityWithIdentifier>act).identifier = `${act.authorName}:${act.title}`
                 return act as ZhihuActivityWithIdentifier
             })

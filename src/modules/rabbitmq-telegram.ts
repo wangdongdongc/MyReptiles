@@ -36,9 +36,9 @@ export class TelegramPhotoMessage extends TelegramMessage {
 
 /**
  * 使用 Telegram 发送短信
- * 
+ *
  * 应根据短信的类型选取不同的发送方法 (从而调用不同的 Telegram Bot API)
- * 
+ *
  * e.g. 发送图片短信 ``SendMessage.forPhotoMessage(photomsg)``
  */
 namespace SendMessage {
@@ -88,7 +88,7 @@ namespace SendMessage {
 
 /**
  * TelegramWorker (单例类)
- * 
+ *
  * 监听 telegram_message_queue 的消息，根据消息内容给 Telegram 发短信
  */
 class TelegramWorker {
@@ -109,7 +109,7 @@ class TelegramWorker {
 
     private constructor() {
         if (TelegramWorker._instance) {
-            throw new Error("Error: Instantiation failed: Use TelegramWorker.getInstance() instead of new.")
+            throw new Error('Error: Instantiation failed: Use TelegramWorker.getInstance() instead of new.')
         }
         TelegramWorker._instance = this
         TelegramWorker._instance.handleMessages()
@@ -125,7 +125,7 @@ class TelegramWorker {
             })
             .then(function (channel) {
                 return channel.assertQueue(MSG_QUEUE).then(function (ok) {
-                    channel.prefetch(TelegramWorker._prefetch) //最大并行数(消息发送)
+                    channel.prefetch(TelegramWorker._prefetch) // 最大并行数(消息发送)
                     return channel.consume(MSG_QUEUE, function (_msg) {
                         if (_msg === null) {
                             return
@@ -143,13 +143,13 @@ class TelegramWorker {
                             (SendMessage.forPhotoMessage(<TelegramPhotoMessage>message))
 
                         sent.then((res) => {
-                            //成功发送
+                            // 成功发送
                         }).catch((err) => {
-                            //失败重发
+                            // 失败重发
                             message.resent_times++
                             channel.sendToQueue(MSG_QUEUE, new Buffer(JSON.stringify(message)))
                         })
-                    }, { noAck: true }) //不使用 ack
+                    }, { noAck: true }) // 不使用 ack
                 })
             })
             .catch(console.error)
@@ -160,7 +160,7 @@ class TelegramWorker {
  * send message to telegram bot
  * @param {string} token telegram bot token
  * @param {number} chat_id telegram chat_id
- * @param {string} content 
+ * @param {string} content
  * @param {string} parse_mode 'html' | 'markdonw'
  */
 export function send_message_to_telegram(token: string, chat_id: number, content: string, parse_mode: string = telegram.MessageMode.markdown) {

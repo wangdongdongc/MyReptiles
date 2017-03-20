@@ -5,7 +5,7 @@ import {Mail, sendMail} from '../modules/telegram'
 
 /**
  * Novel interface for biquge#getRecentChapters(Novel)
- * 
+ *
  * @export
  * @interface Novel
  */
@@ -26,7 +26,7 @@ export interface NovelInfo {
 
 /**
  * Chapter interface for biquge#getRecentChapters()=>Chapter[]
- * 
+ *
  * @export
  * @interface Chapter
  */
@@ -37,12 +37,12 @@ export interface Chapter {
 
 /**
  * 获取笔趣阁上指定小说的最近更新章节
- * 
+ *
  * @export
  * @param {Novel} novel
  * @param {function(Error, Chapters)} callback
  */
-export function getRecentChapters(novel: Novel, callback: (err:Error, list: Chapter[])=>void) {
+export function getRecentChapters(novel: Novel, callback: (err: Error, list: Chapter[]) => void) {
     superagent
         .get(novel.url)
         .end((err, res) => {
@@ -55,13 +55,13 @@ export function getRecentChapters(novel: Novel, callback: (err:Error, list: Chap
                 const mail: Mail = new Mail('笔趣阁', 'Error', `未获取正确的HTML`, `《${novel.name}》\n${time.toString()}`)
                 sendMail(mail)
                 callback(new Error('笔趣阁: 未获取正确的HTML'), null)
-            } 
+            }
             else {
                 let chapter_list: Chapter[] = []
 
                 let $ = cheerio.load(res.text)
                 let list = cheerio.load($('ul.chapter').html())('li')
-                
+
                 for (let i = 0; i < list.length; i++) {
                     let item = list[i]
 
@@ -70,11 +70,11 @@ export function getRecentChapters(novel: Novel, callback: (err:Error, list: Chap
                         'title': node('a').text().trim(),
                         'link': node('a').attr('href').trim()
                     }
-                    
+
                     chapter.link = `http://m.biquge.com${chapter.link}`
                     chapter_list.push(chapter)
                 }
-                
+
                 callback(null, chapter_list)
             }
         })
