@@ -91,7 +91,7 @@ namespace SendMessage {
  *
  * 监听 telegram_message_queue 的消息，根据消息内容给 Telegram 发短信
  */
-class TelegramWorker {
+export class TelegramWorker {
     /**TelegramWorker 单例 */
     private static _instance: TelegramWorker = new TelegramWorker()
     /**消息发送的最大并行数 */

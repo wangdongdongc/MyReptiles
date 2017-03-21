@@ -4,6 +4,7 @@ import * as tuicool from './scripts/tuicool-to-telegram'
 import * as yinwang from './scripts/yinwang-to-telegram'
 import * as zhihu from './scripts/zhihu-to-telegram'
 import * as bilibili from './scripts/bilibili-to-telegram'
+import { TelegramWorker } from './modules/rabbitmq-telegram'
 
 /**
  * 定时
@@ -15,10 +16,13 @@ namespace Interval {
     export const Day = 24 * Hour
 }
 
+let worker
 
 (/**
  * 启动时立即执行一次
  */function firstExecute(){
+    worker = TelegramWorker.getInstance()
+
     biquge.task()
     tuicool.task()
     yinwang.task()
