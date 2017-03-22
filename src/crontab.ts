@@ -37,6 +37,8 @@ let worker
  * 每小时执行一次
  */
 setInterval(function() {
+    worker = TelegramWorker.getInstance()
+
     biquge.task()
     tuicool.task()
     yinwang.task()
