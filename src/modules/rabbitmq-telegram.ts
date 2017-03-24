@@ -93,7 +93,7 @@ namespace SendMessage {
  */
 export class TelegramWorker {
     /**TelegramWorker 单例 */
-    private static _instance: TelegramWorker = new TelegramWorker()
+    private static _instance: TelegramWorker
     /**消息发送的最大并行数 */
     private static readonly _prefetch: number = 1
     /**最大重发次数 */
@@ -104,6 +104,10 @@ export class TelegramWorker {
      * @returns {TelegramWorker} TelegramWorker 类的单例
      */
     public static getInstance(): TelegramWorker {
+        if (!TelegramWorker._instance) {
+            TelegramWorker._instance = new TelegramWorker()
+        }
+        TelegramWorker._instance.handleMessages()
         return TelegramWorker._instance
     }
 
@@ -111,8 +115,6 @@ export class TelegramWorker {
         if (TelegramWorker._instance) {
             throw new Error('Error: Instantiation failed: Use TelegramWorker.getInstance() instead of new.')
         }
-        TelegramWorker._instance = this
-        TelegramWorker._instance.handleMessages()
     }
 
     /**
