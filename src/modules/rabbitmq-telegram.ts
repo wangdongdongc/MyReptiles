@@ -92,69 +92,43 @@ namespace SendMessage {
  * 监听 telegram_message_queue 的消息，根据消息内容给 Telegram 发短信
  */
 export class TelegramWorker {
-    /**TelegramWorker 单例 */
-    private static _instance: TelegramWorker
-    /**消息发送的最大并行数 */
-    private static readonly _prefetch: number = 1
     /**最大重发次数 */
     private static readonly MAX_RESENT_TIMES = 3
 
-    /**
-     * 获取单例
-     * @returns {TelegramWorker} TelegramWorker 类的单例
-     */
-    public static getInstance(): TelegramWorker {
-        if (!TelegramWorker._instance) {
-            TelegramWorker._instance = new TelegramWorker()
-        }
-        TelegramWorker._instance.handleMessages()
-        return TelegramWorker._instance
-    }
+    constructor(
+        private worker_name = '',
+        private readonly create_date_time = new Date()
+    ) {
+        amqp.connect('amqp://localhost').then(function (connection) {
+            return connection.createChannel()
+        }).then(function (channel) {
+            return channel.assertQueue(MSG_QUEUE).then(function (ok) {
+                return channel.consume(MSG_QUEUE, function (_msg) {
+                    if (_msg === null) {
+                        return
+                    }
 
-    private constructor() {
-        if (TelegramWorker._instance) {
-            throw new Error('Error: Instantiation failed: Use TelegramWorker.getInstance() instead of new.')
-        }
-    }
+                    let message = <TelegramMessage>JSON.parse(_msg.content.toString(UTF8))
 
-    /**
-     * 处理队列中的消息
-     */
-    private handleMessages() {
-        amqp
-            .connect('amqp://localhost').then(function (connection) {
-                return connection.createChannel()
+                    if (message.resent_times >= TelegramWorker.MAX_RESENT_TIMES) {
+                        console.error(`发送失败超过3次, 放弃发送: ${message.content}`)
+                        return
+                    }
+
+                    let sent = (message.TYPE === TelegramMessageType.PureMessage) ?
+                        (SendMessage.forPureMessage(<TelegramPureMessage>message)) :
+                        (SendMessage.forPhotoMessage(<TelegramPhotoMessage>message))
+
+                    sent.then((res) => {
+                        // 成功发送
+                    }).catch((err) => {
+                        // 失败重发
+                        message.resent_times++
+                        channel.sendToQueue(MSG_QUEUE, new Buffer(JSON.stringify(message)))
+                    })
+                }, { noAck: true }) // 不使用 ack
             })
-            .then(function (channel) {
-                return channel.assertQueue(MSG_QUEUE).then(function (ok) {
-                    channel.prefetch(TelegramWorker._prefetch) // 最大并行数(消息发送)
-                    return channel.consume(MSG_QUEUE, function (_msg) {
-                        if (_msg === null) {
-                            return
-                        }
-
-                        let message = <TelegramMessage>JSON.parse(_msg.content.toString(UTF8))
-
-                        if (message.resent_times >= TelegramWorker.MAX_RESENT_TIMES) {
-                            console.error(`发送失败超过3次, 放弃发送: ${message.content}`)
-                            return
-                        }
-
-                        let sent = (message.TYPE === TelegramMessageType.PureMessage) ?
-                            (SendMessage.forPureMessage(<TelegramPureMessage>message)) :
-                            (SendMessage.forPhotoMessage(<TelegramPhotoMessage>message))
-
-                        sent.then((res) => {
-                            // 成功发送
-                        }).catch((err) => {
-                            // 失败重发
-                            message.resent_times++
-                            channel.sendToQueue(MSG_QUEUE, new Buffer(JSON.stringify(message)))
-                        })
-                    }, { noAck: true }) // 不使用 ack
-                })
-            })
-            .catch(console.error)
+        }).catch(console.error)
     }
 }
 

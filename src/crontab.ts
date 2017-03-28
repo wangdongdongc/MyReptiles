@@ -16,40 +16,25 @@ namespace Interval {
     export const Day = 24 * Hour
 }
 
-let worker
-
 (/**
  * 启动时立即执行一次
  */function firstExecute(){
-    worker = TelegramWorker.getInstance()
-
+    let worker = new TelegramWorker()
     biquge.task()
     tuicool.task()
     yinwang.task()
     zhihu.task()
     bilibili.task() // 2017/3/16
-
     tsdm.task()
 })()
 
 
-/**
- * 每小时执行一次
- */
 setInterval(function() {
-    worker = TelegramWorker.getInstance()
-
+    let worker = new TelegramWorker()
     biquge.task()
     tuicool.task()
     yinwang.task()
     zhihu.task()
-    bilibili.task()
-}, Interval.Hour)
-
-
-/**
- * 每天执行一次
- */
-setInterval(function() {
     tsdm.task()
-}, Interval.Day)
+    bilibili.task()
+}, Interval.Hour * 2 /*每两小时执行一次*/)
