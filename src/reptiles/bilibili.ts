@@ -1,15 +1,13 @@
 import * as superagent from 'superagent'
 
-import { Mail, sendMail } from '../modules/telegram'
 import { send_mail_to_telegram } from '../modules/rabbitmq-telegram'
-import { token } from '../assets/auth_telegram'
 import { http_header, bilibili_feed_url } from '../assets/auth_bilibili'
 import { getBeijingDateStamp } from '../modules/localization'
 
 /**
  * Bilibili Feed Interface
  */
-export interface IBBFeed {
+interface IBBFeed {
     author: string
     title: string
     description: string
@@ -67,10 +65,7 @@ export function getRecentFeeds(callback: (err: Error, list: IBBFeed[]) => void) 
                             })
                             return
                         default:
-                            sendMail(
-                                new Mail('Bilibili Feed', `未识别的Feed类型: ${rawFeed['type']}`, '', getBeijingDateStamp()),
-                                token.mail
-                            )
+                            send_mail_to_telegram('reptile: bilibili', `未识别的Feed类型: ${rawFeed['type']}`, `${JSON.stringify(rawFeed)}\n${getBeijingDateStamp()}`)
                             return
                     }
                 })
@@ -78,9 +73,7 @@ export function getRecentFeeds(callback: (err: Error, list: IBBFeed[]) => void) 
                 callback(null, feeds)
 
             } catch (error) {
-                sendMail(
-                    new Mail('Bilibili Feed', 'Error', error, getBeijingDateStamp()),
-                    token.mail)
+                send_mail_to_telegram('reptile: bilibili', 'Error', `${error}\n${getBeijingDateStamp()}`)
                 return
             }
         })

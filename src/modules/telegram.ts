@@ -2,6 +2,9 @@ import * as superagent from 'superagent'
 
 import { token, chat_id } from '../assets/auth_telegram'
 
+/**
+ * @deprecated
+ */
 export const MessageMode = {
     'markdown': 'markdown',
     'html': 'html'
@@ -10,7 +13,7 @@ export const MessageMode = {
 
 /**
  * Message interface for telegram#sendMessage(Message)
- *
+ * @deprecated
  * @export
  * @interface Message
  */
@@ -26,7 +29,7 @@ export interface Message {
 
 /**
  * Mail interface for telegram#sendMail(Mail)
- *
+ * @deprecated
  * @export
  * @class Mail
  */
@@ -49,7 +52,7 @@ export class Mail {
 
 /**
  * 向指定的 bot 发送信息
- *
+ * @deprecated
  * @export
  * @param {string} botToken
  * @param {Message} mes
@@ -84,6 +87,7 @@ export interface ImageParams {
 
 /**
  * 向指定的 Bot 发送图片
+ * @deprecated
  * @param {string} botToken
  * @param {string} imageURL
  * @param {function} callback
@@ -104,7 +108,7 @@ export function sendImage(params: ImageParams, callback: (err, res) => void) {
 
 /**
  * 向 sssoa_mail_bot 发送邮件
- *
+ * @deprecated
  * @export
  * @param {Mail} mail
  * @param {string} [mailToken=token.mail]

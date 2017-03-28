@@ -1,7 +1,8 @@
 import * as superagent from 'superagent'
 import * as cheerio from 'cheerio'
 
-import {Mail, sendMail} from '../modules/telegram'
+import { send_mail_to_telegram } from '../modules/rabbitmq-telegram'
+import { getBeijingDateStamp } from '../modules/localization'
 
 /**
  * Novel interface for biquge#getRecentChapters(Novel)
@@ -51,10 +52,9 @@ export function getRecentChapters(novel: Novel, callback: (err: Error, list: Cha
                 return
             }
             if (res.text.indexOf(novel.name) == -1) {
-                const time = new Date()
-                const mail: Mail = new Mail('笔趣阁', 'Error', `未获取正确的HTML`, `《${novel.name}》\n${time.toString()}`)
-                sendMail(mail)
+                send_mail_to_telegram('reptile: 笔趣阁', `未获取正确的HTML`, `《${novel.name }》\n${getBeijingDateStamp()}`)
                 callback(new Error('笔趣阁: 未获取正确的HTML'), null)
+                return
             }
             else {
                 let chapter_list: Chapter[] = []

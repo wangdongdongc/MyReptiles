@@ -23,13 +23,14 @@
   "scripts": {
     "test": "./node_modules/.bin/mocha -t 10000 build/test",
     "node": "node build/crontab.js",
-    "build": "./node_modules/.bin/tsc --sourcemap",
+    "build": "./node_modules/.bin/tsc --sourcemap --watch",
     "restart": "sudo /home/ubuntu/.local/bin/supervisorctl restart reptiles",
     "stop": "sudo /home/ubuntu/.local/bin/supervisorctl stop reptiles",
     "start": "sudo /home/ubuntu/.local/bin/supervisorctl start reptiles",
     "log": "cat /var/log/supervisor/reptilestdout.log",
     "logerr": "cat /var/log/supervisor/reptilestderr.log",
-    "logsys": "cat /var/log/supervisor/supervisord.log"
+    "logsys": "cat /var/log/supervisor/supervisord.log",
+    "deploy": "./node_modules/.bin/tsc; npm run restart"
   },
   "keywords": [
     "reptile",
