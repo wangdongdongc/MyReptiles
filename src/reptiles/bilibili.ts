@@ -45,7 +45,7 @@ export function getRecentFeeds(callback: (err: Error, list: IBBFeed[]) => void) 
 
                 let raw_data: string = (<any>err).rawResponse
 
-                let data = raw_data.substring('jQuery172043578431582043686_1489669341318('.length, raw_data.length - 1)
+                let data = raw_data.substring('jQuery172013733692048922452_1491192035089('.length, raw_data.length - 1)
 
                 let json = JSON.parse(data)
 

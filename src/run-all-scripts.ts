@@ -5,6 +5,7 @@ import * as yinwang from './scripts/yinwang-to-telegram'
 import * as zhihu from './scripts/zhihu-to-telegram'
 import * as bilibili from './scripts/bilibili-to-telegram'
 import { TelegramWorker } from './modules/rabbitmq-telegram'
+import { getBeijingDateStamp } from './modules/localization'
 
 /**
  * 定时
@@ -16,9 +17,7 @@ namespace Interval {
     export const Day = 24 * Hour
 }
 
-(/**
- * 启动时立即执行一次
- */function firstExecute(){
+function run_all_tasks(){
     let worker = new TelegramWorker()
     biquge.task()
     tuicool.task()
@@ -26,15 +25,13 @@ namespace Interval {
     zhihu.task()
     bilibili.task() // 2017/3/16
     tsdm.task()
-})()
+}
 
+console.log(`${getBeijingDateStamp()} Begin Reptile`)
 
-setInterval(function() {
-    let worker = new TelegramWorker()
-    biquge.task()
-    tuicool.task()
-    yinwang.task()
-    zhihu.task()
-    tsdm.task()
-    bilibili.task()
-}, Interval.Hour * 2 /*每两小时执行一次*/)
+run_all_tasks()
+
+/** 将进程维持 1 个小时 */
+setTimeout(function() {
+    console.log(`${getBeijingDateStamp()} End Reptile`)
+}, Interval.Hour)
