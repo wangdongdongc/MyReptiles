@@ -32,7 +32,7 @@
     "log": "cat /var/log/supervisor/reptilestdout.log",
     "logerr": "cat /var/log/supervisor/reptilestderr.log",
     "logsys": "cat /var/log/supervisor/supervisord.log",
-    "clearlogs": "sudo rm /var/log/supervisor/reptilestdout.log /var/log/supervisor/reptilestderr.log /var/log/supervisor/supervisord.log",
+    "clearlogs": "sudo rm /var/log/supervisor/reptilestdout.log /var/log/supervisor/reptilestderr.log /var/log/supervisor/supervisord.log; sudo touch /var/log/supervisor/supervisord.log",
 
     "deploy": "./node_modules/.bin/tsc; npm run restart"
   },

@@ -60,5 +60,5 @@ function zhihu_to_telegram(user: zhihu.User) {
 
         history.save()
     })
-    console.log(`${getBeijingDateStamp()} Finish Script: zhihu-to-telegram @${user.name}`)
+    // console.log(`${getBeijingDateStamp()} Finish Script: zhihu-to-telegram @${user.name}`)
 }

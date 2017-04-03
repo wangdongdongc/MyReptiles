@@ -12,7 +12,7 @@ import { getBeijingDateStamp } from './modules/localization'
  */
 namespace Interval {
     const Second = 1000
-    const Minute = 60 * Second
+    export const Minute = 60 * Second
     export const Hour = 60 * Minute
     export const Day = 24 * Hour
 }
@@ -27,11 +27,11 @@ function run_all_tasks(){
     tsdm.task()
 }
 
-console.log(`${getBeijingDateStamp()} Begin Reptile`)
+console.log(`${getBeijingDateStamp()} Begin Reptiles`)
 
 run_all_tasks()
 
 /** 将进程维持 1 个小时 */
 setTimeout(function() {
-    console.log(`${getBeijingDateStamp()} End Reptile`)
-}, Interval.Hour)
+    console.log(`${getBeijingDateStamp()} End Reptiles`)
+}, Interval.Minute)

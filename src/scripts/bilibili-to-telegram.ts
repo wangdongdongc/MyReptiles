@@ -31,7 +31,7 @@ export function task() {
             })
 
         history.save()
-        console.log(`${getBeijingDateStamp()} Finish Script: bilibili-to-telegram`)
+        // console.log(`${getBeijingDateStamp()} Finish Script: bilibili-to-telegram`)
     })
 }
 

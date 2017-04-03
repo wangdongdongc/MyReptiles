@@ -34,6 +34,6 @@ export function task() {
             })
 
         history.save()
-        console.log(`${getBeijingDateStamp()} Finish Script: yinwang-to-telegram `)
+        // console.log(`${getBeijingDateStamp()} Finish Script: yinwang-to-telegram `)
     })
 }

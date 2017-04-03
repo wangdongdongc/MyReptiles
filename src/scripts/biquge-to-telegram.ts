@@ -43,5 +43,5 @@ export function task() {
         })
     })
 
-    console.log(`${getBeijingDateStamp()} Finish Script: biquge-to-telegram`)
+    // console.log(`${getBeijingDateStamp()} Finish Script: biquge-to-telegram`)
 }
