@@ -17,7 +17,8 @@ namespace Interval {
     export const Day = 24 * Hour
 }
 
-function run_all_tasks(){
+function run_all_tasks() {
+    // tslint:disable-next-line:no-unused-variable
     let worker = new TelegramWorker()
     biquge.task()
     tuicool.task()
@@ -34,4 +35,5 @@ run_all_tasks()
 /** 将进程维持 1 个小时 */
 setTimeout(function() {
     console.log(`${getBeijingDateStamp()} End Reptiles`)
+    process.exit()
 }, Interval.Minute)
