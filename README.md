@@ -6,27 +6,16 @@
 
 > 使用 Telegram 做客户端。Telegram 是一个 Chat App，内置 Bot 功能，能够使用自己的服务器向指定的 Bot 发送信息，而 Bot 的使用者在各个终端上都能够看到，Telegram 跨平台。UI 十分简洁美观，Bot 配置也很容易。
 
-经作者个人实践表明，此举大大缩减了每日阅读资讯所占用的时间...
+## 定时任务
+> 关于如何让爬虫定时执行
 
-## 爬虫简介
-和功能相关的源文件分为了两部分
+1. 使用 crontab 
+2. 使用 nodejs 的 setInterval
+3. 使用 supervisor 的 autorestart
 
-1. `src/reptile` 爬虫
-2. `src/scripts/crontabs` 用于定时执行的脚本（这些脚本调用 `src/reptile` 中的函数获取相应的数据，然后统一处理）
+> crontab 配置方法很难受，不方便调整。每次配置都需要手动计算不同时区的误差。
 
-### 知乎关注用户
+> setInterval 产生了一个 Bug, 用于接受消息队列的 worker 会在开始工作大概半天左右的时间停止工作，原因不明。
 
-> 作者在知乎上关注了一票大V，对于知乎的使用一般在于查看这些大V的动态。常常因为深入各种问答不能自拔，以至于浪费大量时间。
+> supervisor 定时的使用方式不太直接。supervisor 能够自动重新启动进入终止状态的进程。于是当脚本完成工作后，额外的闲置一段时间，自动重启的效果就变成了定时执行。（这样 worker 每次都会重启，就不会有意外死亡的问题）
 
-爬虫：`src/reptiles/zhihu.ts`
-
-脚本：`src/scripts/crontabs/zhihu-to-telegram.ts`
-
-> 在脚本文件中 `followingUsers` 是脚本执行时，将会爬取的用户，脚本将逐一爬去这些知乎用户的动态，全部发送到指定的 Telegram Bot 中。
-
-### 部署步骤(自用)
-
-1. 安装依赖 `npm install`
-2. 加密传输 `src/assets/`
-3. 运行测试 `npm run test`
-4. 启动脚本 `node build/crontab.js` (或重启 supervisor 程序: `npm run restart`)

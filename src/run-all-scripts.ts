@@ -36,4 +36,4 @@ run_all_tasks()
 setTimeout(function() {
     console.log(`${getBeijingDateStamp()} End Reptiles`)
     process.exit()
-}, Interval.Minute)
+}, 30 * Interval.Minute)
