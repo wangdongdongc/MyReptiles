@@ -56,17 +56,22 @@ function writeHistoryFile(filename: string, history: string[]) {
     return history
 }
 
+abstract class HistoryStorage {
+    abstract contain(item: string): boolean
+    abstract push (item: string): void
+}
+
 /**
  * 以文件对象的方式存储历史记录
  *
  * ``let history = new HistoryFile(filename, maxItems)``
  * @export
  */
-export class HistoryFile {
+export class HistoryFile extends HistoryStorage {
     constructor(
         private filename: string,
         private max: number,
-        private queue: string[] = readHistoryFile(filename)) {}
+        private queue: string[] = readHistoryFile(filename)) {super()}
 
     public contain(item: string): boolean {
         return this.queue.indexOf(item) !== -1

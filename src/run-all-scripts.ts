@@ -7,6 +7,12 @@ import * as bilibili from './scripts/bilibili-to-telegram'
 import { TelegramWorker } from './modules/rabbitmq-telegram'
 import { getBeijingDateStamp } from './modules/localization'
 
+console.log(`${getBeijingDateStamp()} Begin Reptiles`)
+setTimeout(function () {
+    console.log(`${getBeijingDateStamp()} End Reptiles`)
+    process.exit()
+}, 30 * Interval.Minute)
+
 /**
  * 定时
  */
@@ -28,12 +34,4 @@ function run_all_tasks() {
     tsdm.task()
 }
 
-console.log(`${getBeijingDateStamp()} Begin Reptiles`)
-
 run_all_tasks()
-
-/** 将进程维持 1 个小时 */
-setTimeout(function() {
-    console.log(`${getBeijingDateStamp()} End Reptiles`)
-    process.exit()
-}, 30 * Interval.Minute)
