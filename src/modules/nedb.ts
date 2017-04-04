@@ -5,6 +5,10 @@ import { historyRoot } from '../settings'
 import { getBeijingDateStamp } from '../modules/localization'
 
 
+/**
+ * @todo 受文件系统权限所致, mkdir 在 supervisor 进程下无法执行
+ * @param {string} file full path of history file
+ */
 function create_file(file: string) {
     if (! fs.existsSync(historyRoot))
         fs.mkdirSync(historyRoot)

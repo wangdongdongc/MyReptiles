@@ -30,16 +30,12 @@ const Sections = [
  * @export
  * @param {(err: Error, list: LightNovel[])=>void} callback - callback function
  */
-export function getRecentNovels(callback: (err: Error, list: LightNovel[]) => void) {
-
-
-    Sections.forEach((section) => {
-        superagent
-            .get(`${TsdmURL}${section}`)
-            .set(http_header)
-            .end((err, res) => {
+export function getRecentNovels(): Promise<LightNovel[]> {
+    return new Promise<LightNovel[]>((resolve, reject) => {
+        Sections.forEach((section) => {
+            superagent.get(`${TsdmURL}${section}`).set(http_header).end((err, res) => {
                 if (err) {
-                    callback(err, null)
+                    reject(err)
                     return
                 }
                 if (res.text.indexOf('sssoa') == -1 ||
@@ -47,7 +43,7 @@ export function getRecentNovels(callback: (err: Error, list: LightNovel[]) => vo
                     const time = new Date()
                     const mail: Mail = new Mail('天使动漫', 'Error', '未获取正确的HTML', `${time.toString()}`)
                     sendMail(mail)
-                    callback(new Error('天使动漫: 未获取正确的HTML'), null)
+                    reject(new Error('天使动漫: 未获取正确的HTML'))
                     return
                 }
                 else {
@@ -81,10 +77,12 @@ export function getRecentNovels(callback: (err: Error, list: LightNovel[]) => vo
 
                         novel_list.push(novel)
                     }
-                    callback(null, novel_list)
+                    resolve(novel_list)
                 }
             }) // end superagent
-    }) // end Sections.forEach
+        }) // end Sections.forEach
+    })
+
 }
 
 /**
@@ -92,7 +90,7 @@ export function getRecentNovels(callback: (err: Error, list: LightNovel[]) => vo
  */
 if (process.argv.length >= 2 &&
     process.argv[1].indexOf('build/reptiles/tsdm.js') != -1) {
-    getRecentNovels((err, list) => {
+    getRecentNovels().then((list) => {
         list.forEach((novel) => {
             console.log(novel.title)
         })

@@ -32,11 +32,9 @@ enum BBFeedType {
  * 获取 Bilibili 最新动态
  * @param {function} callback (err: Error, list: BBFeed[]) => void
  */
-export function getRecentFeeds(callback: (err: Error, list: IBBFeed[]) => void) {
-    superagent
-        .get(bilibili_feed_url)
-        .set(http_header)
-        .end((err, res) => {
+export function getRecentFeeds(): Promise<IBBFeed[]> {
+    return new Promise<IBBFeed[]>((resolve) => {
+        superagent.get(bilibili_feed_url).set(http_header).end((err, res) => {
             try {
                 if (!(err instanceof SyntaxError)) {
                     send_mail_to_telegram('reptile: bilibili', '不正确的异常', err)
@@ -70,13 +68,14 @@ export function getRecentFeeds(callback: (err: Error, list: IBBFeed[]) => void) 
                     }
                 })
 
-                callback(null, feeds)
+                resolve(feeds)
 
             } catch (error) {
                 send_mail_to_telegram('reptile: bilibili', 'Error', `${error}\n${getBeijingDateStamp()}`)
                 return
             }
         })
+    })
 }
 
 

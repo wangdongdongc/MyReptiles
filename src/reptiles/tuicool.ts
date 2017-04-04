@@ -24,20 +24,19 @@ export interface Article {
  * @export
  * @param {fucntion} callback - callback function
  */
-export function getRecentArticles(callback: (err: Error, articles: Article[]) => void) {
-    superagent
-        .get('http://www.tuicool.com')
-        .set(http_header)
-        .end((err, res) => {
+export function getRecentArticles(): Promise<Article[]> {
+    return new Promise<Article[]>((resolve, reject) => {
+        superagent.get('http://www.tuicool.com').set(http_header).end((err, res) => {
             if (err) {
-                callback(err, null)
+                reject(err)
                 return
             }
             if (res.text.indexOf(name) == -1) {
                 const time = new Date()
                 const mail: Mail = new Mail('推酷', 'Error', '未获取正确的HTML', `${time.toString()}`)
                 sendMail(mail)
-                callback(new Error('推酷: 未获取正确的HTML'), null)
+                // callback(new Error('推酷: 未获取正确的HTML'), null)
+                reject(new Error('推酷: 未获取正确的HTML'))
             }
             else {
                 let article_list: Article[] = []
@@ -58,7 +57,8 @@ export function getRecentArticles(callback: (err: Error, articles: Article[]) =>
                     article_list.push(article)
                 }
 
-                callback(null, article_list)
+                resolve(article_list)
             }
-        })
+        }) // end superagent
+    }) // end return
 }

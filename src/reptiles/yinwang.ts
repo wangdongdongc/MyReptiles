@@ -1,7 +1,7 @@
 import * as superagent from 'superagent'
 import * as cheerio from 'cheerio'
 
-import {Mail, sendMail} from '../modules/telegram'
+import { Mail, sendMail } from '../modules/telegram'
 
 /**
  * Tweet interface (yinwang)
@@ -30,42 +30,39 @@ export interface Blog {
 const blogURL = 'http://www.yinwang.org/'
 const identifier = '当然我在扯淡'
 
-export function getTweets(callback: (err: Error, tweets: Tweet[]) => void) {
-    // Todo
-}
+export function getBlogs(): Promise<Blog[]> {
+    return new Promise<Blog[]>((resolve, reject) => {
 
-export function getBlogs(callback: (err: Error, blogs: Blog[]) => void) {
-    superagent
-    .get(blogURL)
-    .end((err, res) => {
-        if (err) {
-            callback(err, null)
-            return
-        }
-        if (res.text.indexOf(identifier) == -1) {
-            const time = new Date()
-            const mail: Mail = new Mail('王垠', 'Error', '未获取正确的HTML', `${time.toString()}`)
-            sendMail(mail)
-            callback(new Error('王垠: 未获取正确的HTML'), null)
-        }
-        else {
-            let blogList: Blog[] = []
-            let $ = cheerio.load(res.text)
-            let list = $('li.list-group-item.title')
+        superagent.get(blogURL).end((err, res) => {
+            if (err) {
+                reject(err)
+                return
+            }
+            if (res.text.indexOf(identifier) == -1) {
+                const time = new Date()
+                const mail: Mail = new Mail('王垠', 'Error', '未获取正确的HTML', `${time.toString()}`)
+                sendMail(mail)
+                reject(new Error('王垠: 未获取正确的HTML'))
+            }
+            else {
+                let blogList: Blog[] = []
+                let $ = cheerio.load(res.text)
+                let list = $('li.list-group-item.title')
 
-            for (let i = 0; i < list.length; i++) {
-                let item = list[i]
+                for (let i = 0; i < list.length; i++) {
+                    let item = list[i]
 
-                let node = cheerio.load(item)
-                let blog: Blog = {
-                    title: node('a').text().toString(),
-                    url: node('a').attr('href').toString()
+                    let node = cheerio.load(item)
+                    let blog: Blog = {
+                        title: node('a').text().toString(),
+                        url: node('a').attr('href').toString()
+                    }
+
+                    blogList.push(blog)
                 }
 
-                blogList.push(blog)
+                resolve(blogList)
             }
-
-            callback(null, blogList)
-        }
+        })
     })
 }

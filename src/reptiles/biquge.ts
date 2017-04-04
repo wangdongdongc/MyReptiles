@@ -43,17 +43,16 @@ export interface Chapter {
  * @param {Novel} novel
  * @param {function(Error, Chapters)} callback
  */
-export function getRecentChapters(novel: Novel, callback: (err: Error, list: Chapter[]) => void) {
-    superagent
-        .get(novel.url)
-        .end((err, res) => {
+export function getRecentChapters(novel: Novel): Promise<Chapter[]> {
+    return new Promise<Chapter[]>((resolve, reject) => {
+        superagent.get(novel.url).end((err, res) => {
             if (err) {
-                callback(err, null)
+                reject(err)
                 return
             }
             if (res.text.indexOf(novel.name) == -1) {
-                send_mail_to_telegram('reptile: 笔趣阁', `未获取正确的HTML`, `《${novel.name }》\n${getBeijingDateStamp()}`)
-                callback(new Error('笔趣阁: 未获取正确的HTML'), null)
+                send_mail_to_telegram('reptile: 笔趣阁', `未获取正确的HTML`, `《${novel.name}》\n${getBeijingDateStamp()}`)
+                reject(new Error('笔趣阁: 未获取正确的HTML'))
                 return
             }
             else {
@@ -75,7 +74,8 @@ export function getRecentChapters(novel: Novel, callback: (err: Error, list: Cha
                     chapter_list.push(chapter)
                 }
 
-                callback(null, chapter_list)
+                resolve(chapter_list)
             }
         })
+    })
 }

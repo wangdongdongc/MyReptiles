@@ -10,7 +10,6 @@ export const MessageMode = {
     'html': 'html'
 }
 
-
 /**
  * Message interface for telegram#sendMessage(Message)
  * @deprecated

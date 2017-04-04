@@ -127,13 +127,12 @@ function handleQuestion(node: CheerioStatic, act: Activity, regx: RegExp) {
  * @param {User} user
  * @param {(err: Error, list: Activity[])=>void} callback
  */
-export function getRecentActivities(user: User, callback: (err: Error, list: Activity[]) => void) {
-    superagent
-        .get(user.activity_page)
-        .set(http_header)
-        .end((err, res) => {
+export function getRecentActivities(user: User): Promise<Activity[]> {
+    return new Promise<Activity[]>((resolve, reject) => {
+
+        superagent.get(user.activity_page).set(http_header).end((err, res) => {
             if (err) {
-                callback(err, null)
+                reject(err)
                 return
             }
             // 验证页面是否正确
@@ -141,7 +140,7 @@ export function getRecentActivities(user: User, callback: (err: Error, list: Act
                 const time = new Date()
                 const mail: Mail = new Mail(`知乎动态@${user.name}`, 'Error', '未获取正确的HTML', `${time.toString()}`)
                 sendMail(mail)
-                callback(new Error(`知乎动态 @${user.name}: 未获取正确的HTML`), null)
+                reject(new Error(`知乎动态 @${user.name}: 未获取正确的HTML`))
             }
             else {
                 let act_list: Activity[] = []
@@ -223,9 +222,10 @@ export function getRecentActivities(user: User, callback: (err: Error, list: Act
                     }
                 }
 
-                callback(null, act_list)
+                resolve(act_list)
             }
         }) // end superagent
+    })
 }
 
 
@@ -242,7 +242,7 @@ if (process.argv.length >= 2 &&
         activity_page: 'https://www.zhihu.com/people/marisa.moe/activities',
         historyFile: 'test_zhihu_reptile.json'
     }
-    getRecentActivities(testUser, (err, list) => {
+    getRecentActivities(testUser).then((activities) => {
         console.log(`END`)
     })
 }

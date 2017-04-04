@@ -1,6 +1,5 @@
 import * as zhihu from '../reptiles/zhihu'
 import { HistoryFile } from '../modules/history'
-// import { getBeijingDateStamp } from '../modules/localization'
 import { send_message_to_telegram } from '../modules/rabbitmq-telegram'
 
 import { token, chat_id } from '../assets/auth_telegram'
@@ -33,32 +32,25 @@ interface ZhihuActivityWithIdentifier extends zhihu.Activity {
  *  note: 同时获取过多知乎用户动态会失败
  */
 function zhihu_to_telegram(user: zhihu.User) {
-    zhihu.getRecentActivities(user, (err, activities) => {
-        if (err) {
-            console.error(`知乎#getRecentActivities(${user.name}) fail: ${err.message}`)
-            return
-        }
-
+    zhihu.getRecentActivities(user).then((activities) => {
         let history = new HistoryFile(user.historyFile, maxHistory)
 
-        activities
-            .map((act) => {
-                // 为每个动态条目添加标识符
-                (<ZhihuActivityWithIdentifier>act).identifier = `${act.authorName}:${act.title}`
-                return act as ZhihuActivityWithIdentifier
-            })
-            .filter((act) => {
-                return !history.contain(act.identifier) && act.meta !== '关注了问题'
-            })
-            .forEach((act) => {
-                let text = `*${user.name}* _${act.meta}_\n*${act.title}*\n${act.link}\n*${act.authorName}*\n${act.content}`
+        activities.map((act) => {
+            // 为每个动态条目添加标识符
+            (<ZhihuActivityWithIdentifier>act).identifier = `${act.authorName}:${act.title}`
+            return act as ZhihuActivityWithIdentifier
+        }).filter((act) => {
+            return !history.contain(act.identifier) && act.meta !== '关注了问题'
+        }).forEach((act) => {
+            let text = `*${user.name}* _${act.meta}_\n*${act.title}*\n${act.link}\n*${act.authorName}*\n${act.content}`
 
-                send_message_to_telegram(token.zhihu, chat_id.me, text)
+            send_message_to_telegram(token.zhihu, chat_id.me, text)
 
-                history.push(act.identifier)
-            })
+            history.push(act.identifier)
+        })
 
         history.save()
+    }).catch((err) => {
+        console.error(`知乎#getRecentActivities(${user.name}) fail: ${err.message}`)
     })
-    // console.log(`${getBeijingDateStamp()} Finish Script: zhihu-to-telegram @${user.name}`)
 }

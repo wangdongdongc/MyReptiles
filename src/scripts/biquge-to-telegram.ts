@@ -21,27 +21,23 @@ export function task() {
             }
         }
 
-        biquge.getRecentChapters(novel, (err, chapters: biquge.Chapter[]) => {
-            if (err) {
+        biquge.getRecentChapters(novel)
+            .then((chapters) => {
+                let history = new HistoryFile(novel.history.filename, novel.history.maxHistory)
+
+                chapters
+                    .filter((chapter) => {
+                        return !history.contain(chapter.title)
+                    })
+                    .forEach((chapter) => {
+                        let text = `*《${novel.name}》*更新了新章节\n[${chapter.title}](${chapter.link})`
+                        send_message_to_telegram(token.biquge, chat_id.me, text)
+                        history.push(chapter.title)
+                    })
+
+                history.save()
+            }).catch((err) => {
                 console.error(`biquge#getRecentChapters(${novel.name}) fail: ${err.message}`)
-                return
-            }
-
-            let history = new HistoryFile(novel.history.filename, novel.history.maxHistory)
-
-            chapters
-                .filter((chapter) => {
-                    return !history.contain(chapter.title)
-                })
-                .forEach((chapter) => {
-                    let text = `*《${novel.name}》*更新了新章节\n[${chapter.title}](${chapter.link})`
-                    send_message_to_telegram(token.biquge, chat_id.me, text)
-                    history.push(chapter.title)
-                })
-
-            history.save()
-        })
+            })
     })
-
-    // console.log(`${getBeijingDateStamp()} Finish Script: biquge-to-telegram`)
 }

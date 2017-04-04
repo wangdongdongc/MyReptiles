@@ -16,37 +16,21 @@ export function task() {
 
     let history = new HistoryDB(historyFile)
 
-    tsdm.getRecentNovels((err: Error, novelList: tsdm.LightNovel[]) => {
-        if (err) {
-            console.error(`tsdm#getRecentNovels fail: ${err.message}`)
-            return
-        }
-
-        // let history = new HistoryFile(historyFile, maxHistory)
-
-        // novelList
-        //     .filter((novel) => {
-        //         return !history.contain(novel.title)
-        //     })
-        //     .forEach((novel) => {
-        //         let text = `*${novel.tag}* ${novel.title}\n${novel.link}`
-        //         send_message_to_telegram(token.tsdm, chat_id.me, text)
-        //         history.push(novel.title)
-        //     })
-
-        novelList.forEach((novel) => {
-            history.contain(novel.title).then((isExist) => {
-                if (! isExist) {
-                    let text = `*${novel.tag}* ${novel.title}\n${novel.link}`
-                    send_message_to_telegram(token.tsdm, chat_id.me, text)
-                    history.insert(novel.title)
-                }
+    tsdm.getRecentNovels()
+        .then((novelList) => {
+            novelList.forEach((novel) => {
+                history.contain(novel.title).then((isExist) => {
+                    if (!isExist) {
+                        let text = `*${novel.tag}* ${novel.title}\n${novel.link}`
+                        send_message_to_telegram(token.tsdm, chat_id.me, text)
+                        history.insert(novel.title)
+                    }
+                })
             })
         })
-
-        // history.save()
-        // console.log(`${getBeijingDateStamp()} Finish Script: tsdm-to-telegram`)
-    })
+        .catch((err) => {
+            console.error(`tsdm#getRecentNovels fail: ${err.message}`)
+        })
 }
 
 
