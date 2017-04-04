@@ -1,7 +1,17 @@
 import * as Datastore from 'nedb'
 import * as path from 'path'
+import * as fs from 'fs'
 import { historyRoot } from '../settings'
 import { getBeijingDateStamp } from '../modules/localization'
+
+
+function create_file(file: string) {
+    if (! fs.existsSync(historyRoot))
+        fs.mkdirSync(historyRoot)
+    if (! fs.existsSync(file)) {
+        fs.appendFileSync(file, '')
+    }
+}
 
 export interface HistoryItem {
     content: string
@@ -11,8 +21,10 @@ export interface HistoryItem {
 export class HistoryDB {
     db: Datastore
     constructor(db_name: string) {
+        let file = path.join(historyRoot, db_name)
+        create_file(file)
         this.db = new Datastore({
-            filename: path.join(historyRoot, db_name),
+            filename: file,
             autoload: true
         })
     }
