@@ -17,7 +17,6 @@ export interface Tweet {
 
 /**
  * Blog interface (yinwang)
- *
  * @export
  * @interface Blog
  */
@@ -30,6 +29,9 @@ export interface Blog {
 const blogURL = 'http://www.yinwang.org/'
 const identifier = '当然我在扯淡'
 
+/**
+ * 获取王垠的全部博文
+ */
 export function getBlogs(): Promise<Blog[]> {
     return new Promise<Blog[]>((resolve, reject) => {
 

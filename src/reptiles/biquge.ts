@@ -38,10 +38,7 @@ export interface Chapter {
 
 /**
  * 获取笔趣阁上指定小说的最近更新章节
- *
- * @export
  * @param {Novel} novel
- * @param {function(Error, Chapters)} callback
  */
 export function getRecentChapters(novel: Novel): Promise<Chapter[]> {
     return new Promise<Chapter[]>((resolve, reject) => {

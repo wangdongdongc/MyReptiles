@@ -30,7 +30,6 @@ enum BBFeedType {
 
 /**
  * 获取 Bilibili 最新动态
- * @param {function} callback (err: Error, list: BBFeed[]) => void
  */
 export function getRecentFeeds(): Promise<IBBFeed[]> {
     return new Promise<IBBFeed[]>((resolve) => {
@@ -85,8 +84,7 @@ export function getRecentFeeds(): Promise<IBBFeed[]> {
  */
 if (process.argv.length >= 2 &&
     process.argv[1].indexOf('build/reptiles/bilibili.js') != -1) {
-    // node bilibili.js
-    getRecentFeeds((err, list) => {
+    getRecentFeeds().then((list) => {
         console.log(`get ${list.length} bilibili feeds`)
         console.log(`END`)
     })

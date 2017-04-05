@@ -20,9 +20,7 @@ export interface Article {
 
 /**
  * 获取推酷上面最新的文章
- *
  * @export
- * @param {fucntion} callback - callback function
  */
 export function getRecentArticles(): Promise<Article[]> {
     return new Promise<Article[]>((resolve, reject) => {

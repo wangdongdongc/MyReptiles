@@ -122,10 +122,8 @@ function handleQuestion(node: CheerioStatic, act: Activity, regx: RegExp) {
 
 /**
  * 获取知乎用户最近动态
- *
  * @export
  * @param {User} user
- * @param {(err: Error, list: Activity[])=>void} callback
  */
 export function getRecentActivities(user: User): Promise<Activity[]> {
     return new Promise<Activity[]>((resolve, reject) => {

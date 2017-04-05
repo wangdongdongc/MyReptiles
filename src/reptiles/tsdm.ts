@@ -26,9 +26,6 @@ const Sections = [
 
 /**
  * 获取天使动漫#轻文社上最新的小说(贴子)
- *
- * @export
- * @param {(err: Error, list: LightNovel[])=>void} callback - callback function
  */
 export function getRecentNovels(): Promise<LightNovel[]> {
     return new Promise<LightNovel[]>((resolve, reject) => {
