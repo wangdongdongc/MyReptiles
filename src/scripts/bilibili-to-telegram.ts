@@ -11,19 +11,18 @@ const maxHistory = 100
  * 任务: 将 Bilibil 上的新动态发送到 Telegram
  */
 export function task() {
-    bilibili.getRecentFeeds()
-    .then((feeds) => {
+    bilibili.getRecentFeeds().then((feed_list) => {
         let history = new HistoryFile(historyFile, maxHistory)
 
-        feeds
-            .filter((feed) => {
-                return !history.contain(feed.title)
-            })
-            .forEach((feed) => {
-                let caption = `${feed.author}:${feed.title}`
-                send_photo_to_telegram(token.bilibili, chat_id.me, feed.pic, caption)
-                history.push(feed.title)
-            })
+        feed_list.filter((feed) => {
+            return !history.contain(feed.title)
+        }).forEach((feed) => {
+            let caption = `${feed.author}:${feed.title}`
+
+            send_photo_to_telegram(token.bilibili, chat_id.me, feed.pic, caption)
+
+            history.push(feed.title)
+        })
 
         history.save()
     })

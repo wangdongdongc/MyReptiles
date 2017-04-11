@@ -16,21 +16,19 @@ export function task() {
 
     let history = new HistoryDB(historyFile)
 
-    tsdm.getRecentNovels()
-        .then((novelList) => {
-            novelList.forEach((novel) => {
-                history.contain(novel.title).then((isExist) => {
-                    if (!isExist) {
-                        let text = `*${novel.tag}* ${novel.title}\n${novel.link}`
-                        send_message_to_telegram(token.tsdm, chat_id.me, text)
-                        history.insert(novel.title)
-                    }
-                })
+    tsdm.getRecentNovels().then((novel_list) => {
+        novel_list.forEach((novel) => {
+            history.contain(novel.title).then((isExist) => {
+                if (! isExist) {
+                    let text = `*${novel.tag}* ${novel.title}\n${novel.link}`
+                    send_message_to_telegram(token.tsdm, chat_id.me, text)
+                    history.insert(novel.title)
+                }
             })
         })
-        .catch((err) => {
-            console.error(`tsdm#getRecentNovels fail: ${err.message}`)
-        })
+    }).catch((err) => {
+        console.error(`tsdm#getRecentNovels fail: ${err.message}`)
+    })
 }
 
 

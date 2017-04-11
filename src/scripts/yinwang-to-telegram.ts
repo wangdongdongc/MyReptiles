@@ -11,24 +11,20 @@ const maxBlogHistory = 300
  * 任务：将王垠的新博文发送至相应 Bot
  */
 export function task() {
-    yinwang.getBlogs()
-        .then((blogList) => {
-            let history = new HistoryFile(blogHistoryFile, maxBlogHistory)
+    yinwang.getBlogs().then((blog_list) => {
+        let history = new HistoryFile(blogHistoryFile, maxBlogHistory)
 
-            blogList
-                .filter((blog) => {
-                    return !history.contain(blog.title)
-                })
-                .forEach((blog) => {
-                    let text = `${blog.title}\n${blog.url}`
-                    send_message_to_telegram(token.yinwang, chat_id.me, text)
+        blog_list.filter((blog) => {
+            return !history.contain(blog.title)
+        }).forEach((blog) => {
+            let text = `${blog.title}\n${blog.url}`
+            send_message_to_telegram(token.yinwang, chat_id.me, text)
 
-                    history.push(blog.title)
-                })
-
-            history.save()
+            history.push(blog.title)
         })
-        .catch((err) => {
-            console.error(`yiwang#getBlogs fail: ${err.message}`)
-        })
+
+        history.save()
+    }).catch((err) => {
+        console.error(`yiwang#getBlogs fail: ${err.message}`)
+    })
 }
