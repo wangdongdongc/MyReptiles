@@ -1,4 +1,4 @@
-import {User, Activity, getRecentActivities} from '../reptiles/zhihu' 
+import {User, Activity, getRecentActivities} from '../reptiles/zhihu'
 import 'should'
 
 const user: User = {
@@ -11,8 +11,7 @@ const user: User = {
 describe(`zhihu: reptile`, () => {
     describe(`#getRecentActivities()`, () => {
         it(`should return activity list`, (done) => {
-            getRecentActivities(user, (err, list) => {
-                if (err) {done(err)}
+            getRecentActivities(user).then((list) => {
                 list.should.be.Array()
                 list.length.should.greaterThan(0)
                 let act: Activity = list[0]
@@ -22,6 +21,8 @@ describe(`zhihu: reptile`, () => {
                 act.should.have.property('authorName')
                 act.should.have.property('content')
                 done()
+            }).catch((err) => {
+                if (err) done(err)
             })
         })
     })

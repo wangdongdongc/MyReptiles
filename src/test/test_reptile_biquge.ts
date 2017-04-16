@@ -13,14 +13,15 @@ const novel: Novel = {
 describe(`biquge: reptile`, () => {
     describe(`#getRecentChapters()`, () => {
         it(`should return chapter list`, (done) => {
-            getRecentChapters(novel, (err, list) => {
-                if (err) {done(err)}
+            getRecentChapters(novel).then((list) => {
                 list.should.be.Array()
                 list.length.should.greaterThan(0)
                 let chapter: Chapter = list[0]
                 chapter.should.have.property('title')
                 chapter.should.have.property('link')
                 done()
+            }).catch((err) => {
+                if (err) done(err)
             })
         })
     })

@@ -1,7 +1,7 @@
 import * as superagent from 'superagent'
 
 import { send_mail_to_telegram } from '../modules/rabbitmq-telegram'
-import { http_header, bilibili_feed_url } from '../assets/auth_bilibili'
+import { http_header, bilibili_feed_url, bilibili_jquery_token } from '../assets/auth_bilibili'
 import { getBeijingDateStamp } from '../modules/localization'
 
 /**
@@ -42,7 +42,7 @@ export function getRecentFeeds(): Promise<IBBFeed[]> {
 
                 let raw_data: string = (<any>err).rawResponse
 
-                let data = raw_data.substring('jQuery172013733692048922452_1491192035089('.length, raw_data.length - 1)
+                let data = raw_data.substring(`jQuery${bilibili_jquery_token}(`.length, raw_data.length - 1)
 
                 let json = JSON.parse(data)
 

@@ -4,8 +4,7 @@ import 'should'
 describe(`tuicool: reptile`, () => {
     describe(`#getRecentArticles()`, () => {
         it(`should return Article list`, (done) => {
-            getRecentArticles((err, list) => {
-                if (err) {done(err)}
+            getRecentArticles().then((list) => {
                 list.should.be.Array()
                 list.length.should.greaterThan(0)
                 let art: Article = list[0]
@@ -14,6 +13,8 @@ describe(`tuicool: reptile`, () => {
                 art.should.have.property('thumb')
                 art.should.have.property('link')
                 done()
+            }).catch((err) => {
+                if (err) done(err)
             })
         })
     })

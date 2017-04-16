@@ -4,8 +4,7 @@ import 'should'
 describe(`bilibili: reptile`, () => {
     describe(`#getRecentFeeds`, () => {
         it(`should return feeds`, (done) => {
-            getRecentFeeds((err, feeds) => {
-                if (err) done(err)
+            getRecentFeeds().then((feeds) => {
                 feeds.should.be.Array()
                 feeds.length.should.greaterThan(0)
                 let feed = feeds[0]
@@ -15,6 +14,8 @@ describe(`bilibili: reptile`, () => {
                 feed.should.have.property('pic')
                 feed.should.have.property('link')
                 done()
+            }).catch((err) => {
+                if (err) done(err)
             })
         })
     })

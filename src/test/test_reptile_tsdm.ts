@@ -4,8 +4,7 @@ import 'should'
 describe(`tsdm: reptile`, () => {
     describe(`#getRecentNovels`, () => {
         it(`should return novel list`, (done) => {
-            getRecentNovels((err, list) => {
-                if (err) {done(err)}
+            getRecentNovels().then((list) => {
                 list.should.be.Array()
                 list.length.should.greaterThan(0)
                 let novel: LightNovel = list[0]
@@ -13,6 +12,8 @@ describe(`tsdm: reptile`, () => {
                 novel.should.have.property('link')
                 novel.should.have.property('tag')
                 done()
+            }).catch((err) => {
+                if (err) done(err)
             })
         })
     })
