@@ -21,7 +21,7 @@ console.log(`${getBeijingDateStamp()} Begin Reptiles`)
 setTimeout(function () {
     console.log(`${getBeijingDateStamp()} End Reptiles`)
     process.exit()
-}, 30 * Interval.Minute)
+}, 1 * Interval.Hour) // 定时效果
 
 
 function run_all_tasks() {
