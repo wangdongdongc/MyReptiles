@@ -137,7 +137,7 @@ export function getRecentActivities(user: User): Promise<Activity[]> {
             if (res.text.indexOf(user.identifier) == -1) {
                 const time = new Date()
                 const mail: Mail = new Mail(`知乎动态@${user.name}`, 'Error', '未获取正确的HTML', `${time.toString()}`)
-                sendMail(mail)
+                // sendMail(mail)
                 reject(new Error(`知乎动态 @${user.name}: 未获取正确的HTML`))
             }
             else {
