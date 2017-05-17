@@ -12,7 +12,7 @@ interface IBBFeed {
     title: string
     description: string
     pic: string
-    link: string
+    // link: string
 }
 
 /**
@@ -24,8 +24,7 @@ export function convertBBFeedToHTML(feed: IBBFeed): string {
 }
 
 enum BBFeedType {
-    UP = 1,
-    Bangumi = 3
+    UP = 0
 }
 
 /**
@@ -35,30 +34,31 @@ export function getRecentFeeds(): Promise<IBBFeed[]> {
     return new Promise<IBBFeed[]>((resolve) => {
         superagent.get(bilibili_feed_url).set(http_header).end((err, res) => {
             try {
-                if (!(err instanceof SyntaxError)) {
-                    send_mail_to_telegram('reptile: bilibili', '不正确的异常', err)
-                    return
-                }
+                // if (!(err instanceof SyntaxError)) {
+                //     send_mail_to_telegram('reptile: bilibili', '不正确的异常', err)
+                //     return
+                // }
 
-                let raw_data: string = (<any>err).rawResponse
+                // let raw_data: string = (<any>err).rawResponse
 
-                let data = raw_data.substring(`jQuery${bilibili_jquery_token}(`.length, raw_data.length - 1)
+                // let data = raw_data.substring(`jQuery${bilibili_jquery_token}(`.length, raw_data.length - 1)
+
+                let data = res.text
 
                 let json = JSON.parse(data)
 
-                let raw_feeds: Object[] = json.data.feeds
+                let raw_feeds: Object[] = json.data
                 let feeds: IBBFeed[] = []
 
                 raw_feeds.forEach((rawFeed) => {
                     switch (<BBFeedType>rawFeed['type']) {
                         case BBFeedType.UP:
-                        case BBFeedType.Bangumi:
                             feeds.push({
-                                author: rawFeed['addition']['author'],
-                                title: rawFeed['addition']['title'],
-                                description: rawFeed['addition']['description'],
-                                pic: rawFeed['addition']['pic'],
-                                link: rawFeed['addition']['link']
+                                author: rawFeed['archive']['owner']['name'],
+                                title: rawFeed['archive']['title'],
+                                description: rawFeed['archive']['desc'],
+                                pic: rawFeed['archive']['pic']
+                                // link: rawFeed['archive']['link']
                             })
                             return
                         default:
@@ -86,6 +86,9 @@ if (process.argv.length >= 2 &&
     process.argv[1].indexOf('build/reptiles/bilibili.js') != -1) {
     getRecentFeeds().then((list) => {
         console.log(`get ${list.length} bilibili feeds`)
+        list.forEach((item) => {
+            console.log(item)
+        })
         console.log(`END`)
     })
 }
