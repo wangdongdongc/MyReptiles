@@ -1,6 +1,6 @@
 import * as superagent from 'superagent'
 import * as cheerio from 'cheerio'
-
+import * as path from 'path'
 import { Mail, sendMail } from '../modules/telegram'
 
 /**
@@ -59,6 +59,8 @@ export function getBlogs(): Promise<Blog[]> {
                         title: node('a').text().toString(),
                         url: node('a').attr('href').toString()
                     }
+
+                    blog.url = path.join(blogURL, blog.url)
 
                     blogList.push(blog)
                 }
