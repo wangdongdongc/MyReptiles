@@ -26,7 +26,7 @@ export interface Blog {
 }
 
 // const tweetURL = 'http://www.yinwang.org/tweet.html'
-const blogURL = 'http://www.yinwang.org/'
+const blogURL = 'http://www.yinwang.org'
 const identifier = '当然我在扯淡'
 
 /**
@@ -57,10 +57,8 @@ export function getBlogs(): Promise<Blog[]> {
                     let node = cheerio.load(item)
                     let blog: Blog = {
                         title: node('a').text().toString(),
-                        url: node('a').attr('href').toString()
+                        url: blogURL + node('a').attr('href').toString()
                     }
-
-                    blog.url = path.join(blogURL, blog.url)
 
                     blogList.push(blog)
                 }
