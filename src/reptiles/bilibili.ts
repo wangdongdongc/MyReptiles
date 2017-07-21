@@ -12,7 +12,7 @@ interface IBBFeed {
     title: string
     description: string
     pic: string
-    // link: string
+    link: string
 }
 
 /**
@@ -57,8 +57,8 @@ export function getRecentFeeds(): Promise<IBBFeed[]> {
                                 author: rawFeed['archive']['owner']['name'],
                                 title: rawFeed['archive']['title'],
                                 description: rawFeed['archive']['desc'],
-                                pic: rawFeed['archive']['pic']
-                                // link: rawFeed['archive']['link']
+                                pic: rawFeed['archive']['pic'],
+                                link: `https://www.bilibili.com/video/av${rawFeed['id']}/`
                             })
                             return
                         default:
