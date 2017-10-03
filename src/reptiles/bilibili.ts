@@ -1,18 +1,19 @@
 import * as superagent from 'superagent'
 
 import { send_mail_to_telegram } from '../modules/rabbitmq-telegram'
-import { http_header, bilibili_feed_url, bilibili_jquery_token } from '../assets/auth_bilibili'
+import { http_header, bilibili_feed_url } from '../assets/auth_bilibili'
 import { getBeijingDateStamp } from '../modules/localization'
 
 /**
  * Bilibili Feed Interface
  */
-interface IBBFeed {
+export interface IBBFeed {
     author: string
     title: string
     description: string
     pic: string
     link: string
+    type: BBFeedType
 }
 
 /**
@@ -23,8 +24,9 @@ export function convertBBFeedToHTML(feed: IBBFeed): string {
     return `<i>${feed.author}\n</i><i>${feed.title}</i>`
 }
 
-enum BBFeedType {
-    UP = 0
+export enum BBFeedType {
+    UP = 0,
+    Bangumi = 1
 }
 
 /**
@@ -34,15 +36,6 @@ export function getRecentFeeds(): Promise<IBBFeed[]> {
     return new Promise<IBBFeed[]>((resolve) => {
         superagent.get(bilibili_feed_url).set(http_header).end((err, res) => {
             try {
-                // if (!(err instanceof SyntaxError)) {
-                //     send_mail_to_telegram('reptile: bilibili', '不正确的异常', err)
-                //     return
-                // }
-
-                // let raw_data: string = (<any>err).rawResponse
-
-                // let data = raw_data.substring(`jQuery${bilibili_jquery_token}(`.length, raw_data.length - 1)
-
                 let data = res.text
 
                 let json = JSON.parse(data)
@@ -50,20 +43,30 @@ export function getRecentFeeds(): Promise<IBBFeed[]> {
                 let raw_feeds: Object[] = json.data
                 let feeds: IBBFeed[] = []
 
-                raw_feeds.forEach((rawFeed) => {
-                    switch (<BBFeedType>rawFeed['type']) {
-                        case BBFeedType.UP:
-                            feeds.push({
-                                author: rawFeed['archive']['owner']['name'],
-                                title: rawFeed['archive']['title'],
-                                description: rawFeed['archive']['desc'],
-                                pic: rawFeed['archive']['pic'],
-                                link: `https://www.bilibili.com/video/av${rawFeed['id']}/`
-                            })
-                            return
-                        default:
-                            send_mail_to_telegram('reptile: bilibili', `未识别的Feed类型: ${rawFeed['type']}`, `${JSON.stringify(rawFeed)}\n${getBeijingDateStamp()}`)
-                            return
+                raw_feeds.forEach((feed) => {
+                    switch (<BBFeedType>feed['type']) {
+                    case BBFeedType.UP:
+                        feeds.push({
+                            type: <BBFeedType>feed['type'],
+                            author: feed['archive']['owner']['name'],
+                            title: feed['archive']['title'],
+                            description: feed['archive']['desc'],
+                            pic: feed['archive']['pic'],
+                            link: `https://www.bilibili.com/video/av${feed['id']}/`
+                        })
+                        return
+                    case BBFeedType.Bangumi:
+                        feeds.push({
+                            type: <BBFeedType>feed['type'],
+                            author: 'Bilibili',
+                            title: `《${feed['bangumi']['title']}》 第${feed['bangumi']['new_ep']['index']}集`,
+                            description: feed['bangumi']['new_ep']['index_title'],
+                            pic: feed['bangumi']['cover'],
+                            link: `https://bangumi.bilibili.com/anime/${feed['id']}/play`
+                        })
+                        return
+                    default:
+                        send_mail_to_telegram('reptile: bilibili', `未识别的Feed类型: ${feed['type']}`, `${JSON.stringify(feed)}\n${getBeijingDateStamp()}`)
                     }
                 })
 

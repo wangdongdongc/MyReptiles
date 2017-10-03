@@ -17,7 +17,12 @@ export function task() {
         feed_list.filter((feed) => {
             return !history.contain(feed.title)
         }).forEach((feed) => {
-            let caption = `${feed.author}:${feed.title}`
+            let caption
+            if (feed.type == bilibili.BBFeedType.Bangumi) {
+                caption = `${feed.title}:${feed.description}`
+            } else {
+                caption = `${feed.author}:${feed.title}`
+            }
 
             send_photo_to_telegram(token.bilibili, chat_id.me, feed.pic, caption)
 
