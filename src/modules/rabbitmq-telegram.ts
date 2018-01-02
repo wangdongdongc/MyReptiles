@@ -154,7 +154,7 @@ export function send_message_to_telegram(token: string, chat_id: number, content
                     parse_mode: parse_mode,
                     resent_times: 0
                 }
-                return channal.sendToQueue(MSG_QUEUE, new Buffer(JSON.stringify(msg)), UTF8)
+                return channal.sendToQueue(MSG_QUEUE, new Buffer(JSON.stringify(msg)))
             })
         })
         .catch(console.error)
@@ -183,7 +183,7 @@ export function send_photo_to_telegram(token: string, chat_id: number, photo_url
                     photo_url: photo_url,
                     resent_times: 0,
                 }
-                return channal.sendToQueue(MSG_QUEUE, new Buffer(JSON.stringify(msg)), UTF8)
+                return channal.sendToQueue(MSG_QUEUE, new Buffer(JSON.stringify(msg)))
             })
         })
         .catch(console.error)
