@@ -1,0 +1,104 @@
+{
+    // Use IntelliSense to learn about possible Node.js debug attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "启动调试: 指定源文件",
+            "program": "${workspaceRoot}/src/scripts/bilibili-to-telegram.ts",
+            "cwd": "${workspaceRoot}",
+            "outFiles": ["${workspaceRoot}/build/scripts/*"],
+            "args": [
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "reptile: bilibili",
+            "program": "${workspaceRoot}/src/reptiles/bilibili.ts",
+            "cwd": "${workspaceRoot}",
+            "outFiles": [
+                "${workspaceRoot}/build/reptiles/*"
+            ],
+            "args": []
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "reptile: tsdm",
+            "program": "${workspaceRoot}/src/reptiles/tsdm.ts",
+            "cwd": "${workspaceRoot}",
+            "outFiles": [
+                "${workspaceRoot}/build/reptiles/*"
+            ],
+            "args": []
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "script: bilibili-to-telegram",
+            "program": "${workspaceRoot}/src/scripts/bilibili-to-telegram.ts",
+            "cwd": "${workspaceRoot}",
+            "outFiles": [
+                "${workspaceRoot}/build/scripts/*"
+            ],
+            "args": []
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "script: biquge-to-telegram",
+            "program": "${workspaceRoot}/src/scripts/biquge-to-telegram.ts",
+            "cwd": "${workspaceRoot}",
+            "outFiles": [
+                "${workspaceRoot}/build/scripts/*"
+            ],
+            "args": []
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "script: tsdm-to-telegram",
+            "program": "${workspaceRoot}/src/scripts/tsdm-to-telegram.ts",
+            "cwd": "${workspaceRoot}",
+            "outFiles": [
+                "${workspaceRoot}/build/scripts/*"
+            ],
+            "args": []
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "module: rabbitmq-telegram",
+            "program": "${workspaceRoot}/src/modules/rabbitmq-telegram.ts",
+            "cwd": "${workspaceRoot}",
+            "outFiles": [
+                "${workspaceRoot}/build/modules/*"
+            ],
+            "args": []
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "module: mysql",
+            "program": "${workspaceRoot}/src/modules/mysql.ts",
+            "cwd": "${workspaceRoot}",
+            "outFiles": [
+                "${workspaceRoot}/build/modules/*"
+            ],
+            "args": []
+        },
+        {
+            "type": "node",
+            "request": "attach",
+            "name": "附加到进程",
+            "address": "localhost",
+            "port": 5858,
+            "outFiles": []
+        }
+    ]
+}

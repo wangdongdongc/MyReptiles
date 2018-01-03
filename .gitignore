@@ -1,6 +1,5 @@
 build/
 src/assets/
 node_modules/
-.vscode/
 history/
 npm-debug.log
