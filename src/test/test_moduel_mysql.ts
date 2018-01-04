@@ -2,11 +2,11 @@ import 'should'
 
 import { History } from '../modules/mysql';
 
-const TEST_TYPE: History.Type = History.Type.bilibili
+const TEST_TYPE: History.Type = History.Type.BILIBILI
 const TEST_CONTENT: string = new Date().toString()
 
 describe(`mysql: module`, () => {
-    describe(`History: 使用 MySQL 实现历史记录功能`, () => {
+    describe(`History: 使用 MySQL 实现历史记录功能 (reptile.history)`, () => {
         it(`#insert`, (done) => {
             History.insert(TEST_TYPE, TEST_CONTENT)
             .then(_ => done())

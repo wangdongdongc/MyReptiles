@@ -17,6 +17,9 @@ function create_file(file: string) {
     }
 }
 
+/**
+ * @deprecated 已改用数据库存储历史记录
+ */
 export interface HistoryItem {
     content: string
     insert_time: string

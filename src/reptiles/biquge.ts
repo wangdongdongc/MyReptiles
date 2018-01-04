@@ -13,6 +13,10 @@ import { getBeijingDateStamp } from '../modules/localization'
 export interface Novel {
     'name': string
     'url': string
+
+    /**
+     * @deprecated 已改用数据库存储
+     */
     'history': {
         'filename': string
         'maxHistory': number

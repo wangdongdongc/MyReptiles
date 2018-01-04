@@ -1,17 +1,16 @@
 import * as zhihu from '../reptiles/zhihu'
-import { HistoryFile } from '../modules/history'
+import { History } from '../modules/mysql'
 import { send_message_to_telegram } from '../modules/rabbitmq-telegram'
 
 import { token, chat_id } from '../assets/auth_telegram'
 import { followingUsers } from '../assets/zhihu'
 
-const maxHistory = 100
 
 /**
  * 任务：将所有关注用户的新动态发送至相应 Bot
  */
 export function task() {
-    // 每隔 1s 进行一次爬取
+    // 每隔 1s 进行爬取一个用户的动态
     let intervalTime = 1000 /* ms */
     let i = 0
     let handler = setInterval(() => {
@@ -33,23 +32,23 @@ interface ZhihuActivityWithIdentifier extends zhihu.Activity {
  */
 function zhihu_to_telegram(user: zhihu.User) {
     zhihu.getRecentActivities(user).then((activities) => {
-        let history = new HistoryFile(user.historyFile, maxHistory)
 
-        activities.map((act) => {
-            // 为每个动态条目添加标识符
+        activities.map(act => {
+            // 为每个条目构造标识符
             (<ZhihuActivityWithIdentifier>act).identifier = `${act.authorName}:${act.title}`
             return act as ZhihuActivityWithIdentifier
-        }).filter((act) => {
-            return !history.contain(act.identifier) && act.meta !== '关注了问题'
-        }).forEach((act) => {
-            let text = `*${user.name}* _${act.meta}_\n*${act.title}*\n${act.link}\n*${act.authorName}*\n${act.content}`
-
-            send_message_to_telegram(token.zhihu, chat_id.me, text)
-
-            history.push(act.identifier)
+        }).forEach(act => {
+            History
+            .contain(History.Type.ZHIHU, act.identifier)
+            .then(isContain => {
+                if (!isContain && act.meta !== '关注了问题') {
+                    let text = `*${user.name}* _${act.meta}_\n*${act.title}*\n${act.link}\n*${act.authorName}*\n${act.content}`
+                    send_message_to_telegram(token.zhihu, chat_id.me, text)
+                    History.insert(History.Type.ZHIHU, act.identifier)
+                }
+            })
         })
 
-        history.save()
     }).catch((err) => {
         console.error(`知乎#getRecentActivities(${user.name}) fail: ${err.message}`)
     })

@@ -65,6 +65,7 @@ abstract class HistoryStorage {
  * 以文件对象的方式存储历史记录
  *
  * ``let history = new HistoryFile(filename, maxItems)``
+ * @deprecated 已改用数据库存储历史记录
  * @export
  */
 export class HistoryFile extends HistoryStorage {

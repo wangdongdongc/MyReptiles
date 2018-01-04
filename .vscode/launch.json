@@ -40,6 +40,17 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "run-all-scripts",
+            "program": "${workspaceRoot}/src/run-all-scripts.ts",
+            "cwd": "${workspaceRoot}",
+            "outFiles": [
+                "${workspaceRoot}/build/*"
+            ],
+            "args": []
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "script: bilibili-to-telegram",
             "program": "${workspaceRoot}/src/scripts/bilibili-to-telegram.ts",
             "cwd": "${workspaceRoot}",
