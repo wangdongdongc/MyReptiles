@@ -1,8 +1,8 @@
 import * as tuicool from '../reptiles/tuicool'
-import { History } from '../modules/mysql'
-import { sendMessageToRabbitMQ } from '../modules/rabbitmq-telegram'
+import {History} from '../modules/mysql'
+import {sendMessageToRabbitMQ} from '../modules/rabbitmq-telegram'
 
-import { token, chat_id } from '../assets/auth_telegram'
+import {token, chat_id} from '../assets/auth_telegram'
 
 
 /**
@@ -18,13 +18,12 @@ export function task() {
                 content: article.title
             }
 
-            History
-            .contain(historyId)
-            .then(isContain => {
-                if (! isContain) {
-                    let text = `*${article.title}*\n${article.link}\n${article.cut}`
-                    sendMessageToRabbitMQ(token.tuibool, chat_id.me, text, historyId)
-                    History.insert(historyId)
+            History.contain(historyId).then(isContain => {
+                if (!isContain) {
+                    History.insert(historyId).then(_ => {
+                        let text = `*${article.title}*\n${article.link}\n${article.cut}`
+                        sendMessageToRabbitMQ(token.tuibool, chat_id.me, text, historyId)
+                    })
                 }
             })
         })

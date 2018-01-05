@@ -1,8 +1,6 @@
 import * as superagent from 'superagent'
 import * as cheerio from 'cheerio'
 
-import { Mail, sendMail } from '../modules/telegram'
-
 import { http_header } from '../assets/auth_zhihu'
 
 interface ActType {
@@ -135,9 +133,7 @@ export function getRecentActivities(user: User): Promise<Activity[]> {
             }
             // 验证页面是否正确
             if (res.text.indexOf(user.identifier) == -1) {
-                const time = new Date()
-                const mail: Mail = new Mail(`知乎动态@${user.name}`, 'Error', '未获取正确的HTML', `${time.toString()}`)
-                // sendMail(mail)
+
                 reject(new Error(`知乎动态 @${user.name}: 未获取正确的HTML`))
             }
             else {

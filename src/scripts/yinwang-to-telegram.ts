@@ -1,8 +1,8 @@
 import * as yinwang from '../reptiles/yinwang'
-import { History } from '../modules/mysql'
-import { sendMessageToRabbitMQ } from '../modules/rabbitmq-telegram'
+import {History} from '../modules/mysql'
+import {sendMessageToRabbitMQ} from '../modules/rabbitmq-telegram'
 
-import { token, chat_id } from '../assets/auth_telegram'
+import {token, chat_id} from '../assets/auth_telegram'
 
 
 /**
@@ -13,18 +13,17 @@ export function task() {
 
         blog_list.forEach(blog => {
 
-            const historyId: History.Identifier = { 
+            const historyId: History.Identifier = {
                 type: History.Type.YINWANG,
                 content: blog.title
             }
 
-            History
-            .contain(historyId)
-            .then(isContain => {
-                if  (! isContain) {
-                    let text = `${blog.title}\n${blog.url}`
-                    sendMessageToRabbitMQ(token.yinwang, chat_id.me, text, historyId)
-                    History.insert(historyId)
+            History.contain(historyId).then(isContain => {
+                if (!isContain) {
+                    History.insert(historyId).then(_ => {
+                        let text = `${blog.title}\n${blog.url}`
+                        sendMessageToRabbitMQ(token.yinwang, chat_id.me, text, historyId)
+                    })
                 }
             })
         })

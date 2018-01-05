@@ -1,9 +1,9 @@
 import * as zhihu from '../reptiles/zhihu'
-import { History } from '../modules/mysql'
-import { sendMessageToRabbitMQ } from '../modules/rabbitmq-telegram'
+import {History} from '../modules/mysql'
+import {sendMessageToRabbitMQ} from '../modules/rabbitmq-telegram'
 
-import { token, chat_id } from '../assets/auth_telegram'
-import { followingUsers } from '../assets/zhihu'
+import {token, chat_id} from '../assets/auth_telegram'
+import {followingUsers} from '../assets/zhihu'
 
 
 /**
@@ -11,7 +11,8 @@ import { followingUsers } from '../assets/zhihu'
  */
 export function task() {
     // 每隔 1s 进行爬取一个用户的动态
-    let intervalTime = 1000 /* ms */
+    let intervalTime = 1000
+    /* ms */
     let i = 0
     let handler = setInterval(() => {
         zhihu_to_telegram(followingUsers[i])
@@ -35,22 +36,21 @@ function zhihu_to_telegram(user: zhihu.User) {
 
         activities.map(act => {
             // 为每个条目构造标识符
-            (<ZhihuActivityWithIdentifier>act).identifier = `${act.authorName}:${act.title}`
+            (<ZhihuActivityWithIdentifier> act).identifier = `${act.authorName}:${act.title}`
             return act as ZhihuActivityWithIdentifier
         }).forEach(act => {
 
-            const historyId: History.Identifier = { 
+            const historyId: History.Identifier = {
                 type: History.Type.ZHIHU,
                 content: act.identifier
             }
 
-            History
-            .contain(historyId)
-            .then(isContain => {
+            History.contain(historyId).then(isContain => {
                 if (!isContain && act.meta !== '关注了问题') {
-                    let text = `*${user.name}* _${act.meta}_\n*${act.title}*\n${act.link}\n*${act.authorName}*\n${act.content}`
-                    sendMessageToRabbitMQ(token.zhihu, chat_id.me, text, historyId)
-                    History.insert(historyId)
+                    History.insert(historyId).then(_ => {
+                        let text = `*${user.name}* _${act.meta}_\n*${act.title}*\n${act.link}\n*${act.authorName}*\n${act.content}`
+                        sendMessageToRabbitMQ(token.zhihu, chat_id.me, text, historyId)
+                    })
                 }
             })
         })

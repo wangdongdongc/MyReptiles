@@ -81,8 +81,7 @@ export namespace History {
     export function updateStatus(id: Identifier, status: Status): Promise<Boolean> {
         return new Promise<Boolean>((resolve, reject) => {
             pool.query(
-                `UPDATE ${TABLE} SET status='${status}' 
-                 WHERE type='${id.type}' AND content='${id.content}'`, 
+                `UPDATE ${TABLE} SET status='${status}' WHERE type='${id.type}' AND content='${id.content}'`,
                 (err, result) => {
                     if (err) resolve(false)
                     else resolve(true)

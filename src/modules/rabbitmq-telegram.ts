@@ -4,7 +4,7 @@ import * as telegram from './telegram'
 import { getBeijingDateStamp } from './localization'
 
 import { token, chat_id } from '../assets/auth_telegram'
-import { History } from './mysql';
+import { History } from './mysql'
 
 const MSG_QUEUE = 'message-to-telegram'
 const UTF8 = 'utf8'
@@ -22,7 +22,7 @@ abstract class TelegramMessage {
     content: string
     /**重发次数 */
     resent_times: number
-    
+
     /**[可选] 提供给 RabbitMQ Worker 消息的标示 */
     identifier?: History.Identifier
 }
@@ -144,7 +144,8 @@ export class RabbitMQWorker {
  * @param {string} token telegram bot token
  * @param {number} chatId telegram chat_id
  * @param {string} content
- * @param {string} parseMode 'html' | 'markdonw'
+ * @param {History.Identifier} identifier
+ * @param {string} parseMode 'html' | 'markdown'
  */
 export function sendMessageToRabbitMQ(token: string, chatId: number, content: string, identifier: History.Identifier = null, parseMode: string = telegram.MessageMode.markdown) {
     amqp.connect('amqp://localhost')
@@ -175,6 +176,7 @@ export function sendMessageToRabbitMQ(token: string, chatId: number, content: st
  * @param {number} chatId telegram chat id
  * @param {string} photoUrl
  * @param {string} caption caption of photo
+ * @param {History.Identifier} identifier
  */
 export function sendPhotoMsgToRabbitMQ(token: string, chatId: number, photoUrl: string, caption: string, identifier: History.Identifier = null) {
     amqp.connect('amqp://localhost')

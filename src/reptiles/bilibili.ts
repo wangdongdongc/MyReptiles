@@ -18,7 +18,7 @@ export interface IBBFeed {
 
 /**
  * 将 bilibili 动态转换成 HTML格式的字符串
- * @param {BBFeed} feed bilibili 动态
+ * @param {IBBFeed} feed bilibili 动态
  */
 export function convertBBFeedToHTML(feed: IBBFeed): string {
     return `<i>${feed.author}\n</i><i>${feed.title}</i>`
@@ -66,7 +66,7 @@ export function getRecentFeeds(): Promise<IBBFeed[]> {
                         })
                         return
                     default:
-                            sendMailToRabbitMQ('reptile: bilibili', `未识别的Feed类型: ${feed['type']}`, `${JSON.stringify(feed)}\n${getBeijingDateStamp()}`)
+                        sendMailToRabbitMQ('reptile: bilibili', `未识别的Feed类型: ${feed['type']}`, `${JSON.stringify(feed)}\n${getBeijingDateStamp()}`)
                     }
                 })
 

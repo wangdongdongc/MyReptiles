@@ -1,8 +1,8 @@
 import * as bilibili from '../reptiles/bilibili'
-import { History } from '../modules/mysql'
-import { sendPhotoMsgToRabbitMQ } from '../modules/rabbitmq-telegram'
+import {History} from '../modules/mysql'
+import {sendPhotoMsgToRabbitMQ} from '../modules/rabbitmq-telegram'
 
-import { token, chat_id } from '../assets/auth_telegram'
+import {token, chat_id} from '../assets/auth_telegram'
 
 
 /**
@@ -13,23 +13,24 @@ export function task() {
 
         feed_list.forEach(feed => {
 
-            const historyId: History.Identifier = { 
+            const historyId: History.Identifier = {
                 type: History.Type.BILIBILI,
                 content: feed.title
             }
 
-            History
-            .contain(historyId)
-            .then(isContain => {
-                if (! isContain) {
-                    let caption
-                    if (feed.type == bilibili.BBFeedType.Bangumi) {
-                        caption = `${feed.title}：${feed.description}`
-                    } else {
-                        caption = `${feed.author}：${feed.title}`
-                    }
-                    sendPhotoMsgToRabbitMQ(token.bilibili, chat_id.me, feed.pic, caption, historyId)
-                    History.insert(historyId)
+            History.contain(historyId).then(isContain => {
+                if (!isContain) {
+                    History.insert(historyId).then(_ => {
+                        let caption
+                        if (feed.type == bilibili.BBFeedType.Bangumi) {
+                            caption = `${feed.title}：${feed.description}`
+                        } else {
+                            caption = `${feed.author}：${feed.title}`
+                        }
+                        sendPhotoMsgToRabbitMQ(
+                            token.bilibili, chat_id.me, feed.pic, caption,
+                            historyId)
+                    })
                 }
             })
         })

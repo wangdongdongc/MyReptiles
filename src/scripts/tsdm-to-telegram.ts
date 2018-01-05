@@ -1,9 +1,9 @@
 import * as tsdm from '../reptiles/tsdm'
-import { History } from '../modules/mysql'
+import {History} from '../modules/mysql'
 
-import { sendMessageToRabbitMQ } from '../modules/rabbitmq-telegram'
+import {sendMessageToRabbitMQ} from '../modules/rabbitmq-telegram'
 
-import { token, chat_id } from '../assets/auth_telegram'
+import {token, chat_id} from '../assets/auth_telegram'
 
 
 /**
@@ -16,17 +16,16 @@ export function task() {
         novel_list.forEach(novel => {
 
             const historyId: History.Identifier = {
-                type: History.Type.TSDM, 
+                type: History.Type.TSDM,
                 content: novel.title
             }
 
-            History
-            .contain(historyId)
-            .then(isContain => {
-                if (! isContain) {
-                    let text = `*${novel.tag}* ${novel.title}\n${novel.link}`
-                    sendMessageToRabbitMQ(token.tsdm, chat_id.me, text, historyId)
-                    History.insert(historyId)
+            History.contain(historyId).then(isContain => {
+                if (!isContain) {
+                    History.insert(historyId).then(_ => {
+                        let text = `*${novel.tag}* ${novel.title}\n${novel.link}`
+                        sendMessageToRabbitMQ(token.tsdm, chat_id.me, text, historyId)
+                    })
                 }
             })
         })

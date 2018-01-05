@@ -12,7 +12,7 @@ describe(`telegram: module`, () => {
     describe(`#sendMessage()`, () => {
         it(`should return 'res.ok == true'`, (done) => {
             sendMessage(token.bot, mes, (err, res) => {
-                if(err) done(err)
+                if (err) done(err)
                 else {
                     res.should.have.property('ok')
                     res.ok.should.eql(true)

@@ -87,8 +87,7 @@ export interface ImageParams {
 /**
  * 向指定的 Bot 发送图片
  * @deprecated
- * @param {string} botToken
- * @param {string} imageURL
+ * @param {ImageParams} params
  * @param {function} callback
  */
 export function sendImage(params: ImageParams, callback: (err, res) => void) {
