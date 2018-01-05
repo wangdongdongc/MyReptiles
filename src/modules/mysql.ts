@@ -7,7 +7,7 @@ import { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME } from '../assets/auth_mysql'
  * MySQL Connection Pool
  */
 const pool = mysql.createPool({
-    connectionLimit: 10,
+    connectionLimit: 3,
     host: DB_HOST,
     user: DB_USER,
     password: DB_PASSWORD,
@@ -18,6 +18,17 @@ export namespace History {
 
     const TABLE = 'reptile.history'
 
+    /** 记录的状态 */
+    export enum Status {
+        /** 未知 */
+        UNKNOWN = 'unknown',
+        /** 记录已发送(至Telegram) */
+        SOLVED = 'solved'
+        /** 记录未发送 */,
+        UN_SOLVED = 'unsolved',
+    }
+
+    /** 历史记录的类型 */
     export enum Type {
         BILIBILI = 'bilibili',
         BIQUGE = 'biquge',
@@ -27,10 +38,16 @@ export namespace History {
         ZHIHU = 'zhihu',
     }
 
-    export function insert(type: Type, content: string): Promise<Boolean> {
+    /** 标识符用于定位到数据库里的一条历史记录 */
+    export interface Identifier {
+        type: Type,
+        content: string
+    }
+
+    export function insert(id: Identifier): Promise<Boolean> {
         return new Promise<Boolean>((resolve, reject) => {
             pool.query(
-                `INSERT INTO ${TABLE}(type, content) VALUE ('${type}', '${content}')`
+                `INSERT INTO ${TABLE}(type, content) VALUE ('${id.type}', '${id.content}')`
                 , (err, _) => {
                     if (err) resolve(false)
                     else resolve(true)
@@ -38,10 +55,10 @@ export namespace History {
         })
     }
 
-    export function remove(type: Type, content: string) {
+    export function remove(id: Identifier) {
         return new Promise<Boolean>((resolve, reject) => {
             pool.query(
-                `DELETE FROM ${TABLE} WHERE type='${type}' AND content='${content}'`
+                `DELETE FROM ${TABLE} WHERE type='${id.type}' AND content='${id.content}'`
                 , (err, _) => {
                     if (err) resolve(false)
                     else resolve(true)
@@ -49,14 +66,26 @@ export namespace History {
         })
     }
 
-    export function contain(type: Type, content: string): Promise<Boolean> {
+    export function contain(id: Identifier): Promise<Boolean> {
         return new Promise<Boolean>((resolve, reject) => {
             pool.query(
-                `SELECT * FROM ${TABLE} WHERE type='${type}' AND content='${content}'`
+                `SELECT * FROM ${TABLE} WHERE type='${id.type}' AND content='${id.content}'`
                 , (err, result) => {
                     if (err) reject(err)
-                    if (result.length > 0) resolve(true)
+                    if (result.length && result.length > 0) resolve(true)
                     else resolve(false)
+                })
+        })
+    }
+
+    export function updateStatus(id: Identifier, status: Status): Promise<Boolean> {
+        return new Promise<Boolean>((resolve, reject) => {
+            pool.query(
+                `UPDATE ${TABLE} SET status='${status}' 
+                 WHERE type='${id.type}' AND content='${id.content}'`, 
+                (err, result) => {
+                    if (err) resolve(false)
+                    else resolve(true)
                 })
         })
     }

@@ -1,7 +1,7 @@
 import * as superagent from 'superagent'
 import * as cheerio from 'cheerio'
 
-import { send_mail_to_telegram } from '../modules/rabbitmq-telegram'
+import { sendMailToRabbitMQ } from '../modules/rabbitmq-telegram'
 import { getBeijingDateStamp } from '../modules/localization'
 
 /**
@@ -52,7 +52,7 @@ export function getRecentChapters(novel: Novel): Promise<Chapter[]> {
                 return
             }
             if (res.text.indexOf(novel.name) == -1) {
-                send_mail_to_telegram('reptile: 笔趣阁', `未获取正确的HTML`, `《${novel.name}》\n${getBeijingDateStamp()}`)
+                sendMailToRabbitMQ('reptile: 笔趣阁', `未获取正确的HTML`, `《${novel.name}》\n${getBeijingDateStamp()}`)
                 reject(new Error('笔趣阁: 未获取正确的HTML'))
                 return
             }

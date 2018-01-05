@@ -4,6 +4,7 @@ import * as telegram from './telegram'
 import { getBeijingDateStamp } from './localization'
 
 import { token, chat_id } from '../assets/auth_telegram'
+import { History } from './mysql';
 
 const MSG_QUEUE = 'message-to-telegram'
 const UTF8 = 'utf8'
@@ -21,6 +22,9 @@ abstract class TelegramMessage {
     content: string
     /**重发次数 */
     resent_times: number
+    
+    /**[可选] 提供给 RabbitMQ Worker 消息的标示 */
+    identifier?: History.Identifier
 }
 
 /**Telegram 纯文本短信 */
@@ -41,12 +45,12 @@ export class TelegramPhotoMessage extends TelegramMessage {
  *
  * e.g. 发送图片短信 ``SendMessage.forPhotoMessage(photomsg)``
  */
-namespace SendMessage {
+namespace Telegram {
     /**
      * 使用 Telegram 发送纯文本短信
      * @param {TelegramPureMessage} msg 纯文本短信
      */
-    export function forPureMessage(msg: TelegramPureMessage) {
+    export function sendPureMessage(msg: TelegramPureMessage) {
         return new Promise((resolve, reject) => {
             telegram.sendMessage(msg.bot_token, {
                 chat_id: msg.chat_id,
@@ -67,7 +71,7 @@ namespace SendMessage {
      * 使用 Telegram 发送图片短信
      * @param {TelegramPhotoMessage} msg 图片短信
      */
-    export function forPhotoMessage(msg: TelegramPhotoMessage) {
+    export function sendPhotoMessage(msg: TelegramPhotoMessage) {
         return new Promise((resolve, reject) => {
             telegram.sendImage({
                 bot_token: msg.bot_token,
@@ -87,11 +91,9 @@ namespace SendMessage {
 }
 
 /**
- * TelegramWorker (单例类)
- *
- * 监听 telegram_message_queue 的消息，根据消息内容给 Telegram 发短信
+ * RabbitMQWorker: 监听消息队列，根据消息内容给 Telegram 发短信
  */
-export class TelegramWorker {
+export class RabbitMQWorker {
     /**最大重发次数 */
     private static readonly MAX_RESENT_TIMES = 3
 
@@ -110,19 +112,24 @@ export class TelegramWorker {
 
                     let message = <TelegramMessage>JSON.parse(_msg.content.toString(UTF8))
 
-                    if (message.resent_times >= TelegramWorker.MAX_RESENT_TIMES) {
-                        console.error(`发送失败超过3次, 放弃发送: ${message.content}`)
+                    if (message.resent_times >= RabbitMQWorker.MAX_RESENT_TIMES) {
+                        if (message.identifier) {
+                            History.updateStatus(message.identifier, History.Status.UN_SOLVED)
+                        }
                         return
                     }
 
                     let sent = (message.TYPE === TelegramMessageType.PureMessage) ?
-                        (SendMessage.forPureMessage(<TelegramPureMessage>message)) :
-                        (SendMessage.forPhotoMessage(<TelegramPhotoMessage>message))
+                        (Telegram.sendPureMessage(<TelegramPureMessage>message)) :
+                        (Telegram.sendPhotoMessage(<TelegramPhotoMessage>message))
 
                     sent.then((res) => {
                         // 成功发送
+                        if (message.identifier) {
+                            History.updateStatus(message.identifier, History.Status.SOLVED)
+                        }
                     }).catch((err) => {
-                        // 失败重发
+                        // 失败重发(将消息重新放回队列)
                         message.resent_times++
                         channel.sendToQueue(MSG_QUEUE, new Buffer(JSON.stringify(message)))
                     })
@@ -133,13 +140,13 @@ export class TelegramWorker {
 }
 
 /**
- * send message to telegram bot
+ * 将普通文字消息发送到 RabbitMQ
  * @param {string} token telegram bot token
- * @param {number} chat_id telegram chat_id
+ * @param {number} chatId telegram chat_id
  * @param {string} content
- * @param {string} parse_mode 'html' | 'markdonw'
+ * @param {string} parseMode 'html' | 'markdonw'
  */
-export function send_message_to_telegram(token: string, chat_id: number, content: string, parse_mode: string = telegram.MessageMode.markdown) {
+export function sendMessageToRabbitMQ(token: string, chatId: number, content: string, identifier: History.Identifier = null, parseMode: string = telegram.MessageMode.markdown) {
     amqp.connect('amqp://localhost')
         .then((connection) => {
             return connection.createChannel()
@@ -149,10 +156,11 @@ export function send_message_to_telegram(token: string, chat_id: number, content
                 let msg: TelegramPureMessage = {
                     TYPE: TelegramMessageType.PureMessage,
                     bot_token: token,
-                    chat_id: chat_id,
+                    chat_id: chatId,
                     content: content,
-                    parse_mode: parse_mode,
-                    resent_times: 0
+                    parse_mode: parseMode,
+                    resent_times: 0,
+                    identifier: identifier
                 }
                 return channal.sendToQueue(MSG_QUEUE, new Buffer(JSON.stringify(msg)))
             })
@@ -162,13 +170,13 @@ export function send_message_to_telegram(token: string, chat_id: number, content
 
 
 /**
- * send photo to telegram bot
+ * 将图片消息发送到 RabbitMQ
  * @param {string} token telegram bot token
- * @param {number} chat_id telegram chat_id
- * @param {string} photo_url
+ * @param {number} chatId telegram chat id
+ * @param {string} photoUrl
  * @param {string} caption caption of photo
  */
-export function send_photo_to_telegram(token: string, chat_id: number, photo_url: string, caption: string) {
+export function sendPhotoMsgToRabbitMQ(token: string, chatId: number, photoUrl: string, caption: string, identifier: History.Identifier = null) {
     amqp.connect('amqp://localhost')
         .then((connection) => {
             return connection.createChannel()
@@ -178,10 +186,11 @@ export function send_photo_to_telegram(token: string, chat_id: number, photo_url
                 let msg: TelegramPhotoMessage = {
                     TYPE: TelegramMessageType.PhotoMessage,
                     bot_token: token,
-                    chat_id: chat_id,
+                    chat_id: chatId,
                     content: caption,
-                    photo_url: photo_url,
+                    photo_url: photoUrl,
                     resent_times: 0,
+                    identifier: identifier
                 }
                 return channal.sendToQueue(MSG_QUEUE, new Buffer(JSON.stringify(msg)))
             })
@@ -189,10 +198,15 @@ export function send_photo_to_telegram(token: string, chat_id: number, photo_url
         .catch(console.error)
 }
 
-
-export function send_mail_to_telegram(from: string, title: string, content: string) {
+/**
+ * 将邮件消息发送到 RabbitMQ
+ * @param {string} from 发送人
+ * @param {string} title 标题
+ * @param {string} content 内容
+ */
+export function sendMailToRabbitMQ(from: string, title: string, content: string) {
     let text = `*From*: ${from}\n*${title}*\n${content}\n${getBeijingDateStamp()}`
-    send_message_to_telegram(token.mail, chat_id.me, text)
+    sendMessageToRabbitMQ(token.mail, chat_id.me, text)
 }
 
 
@@ -200,6 +214,6 @@ if (process.argv.length >= 2 && process.argv[1].indexOf('rabbitmq') != -1) {
     main(process.argv)
 }
 function main(argv: string[]) {
-    send_mail_to_telegram('WDD', 'TEST', '测试一下')
+    sendMailToRabbitMQ('WDD', 'TEST', '测试一下')
     console.log(`END`)
 }

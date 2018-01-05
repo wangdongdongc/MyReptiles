@@ -1,6 +1,6 @@
 import * as bilibili from '../reptiles/bilibili'
 import { History } from '../modules/mysql'
-import { send_photo_to_telegram } from '../modules/rabbitmq-telegram'
+import { sendPhotoMsgToRabbitMQ } from '../modules/rabbitmq-telegram'
 
 import { token, chat_id } from '../assets/auth_telegram'
 
@@ -12,8 +12,14 @@ export function task() {
     bilibili.getRecentFeeds().then((feed_list) => {
 
         feed_list.forEach(feed => {
+
+            const historyId: History.Identifier = { 
+                type: History.Type.BILIBILI,
+                content: feed.title
+            }
+
             History
-            .contain(History.Type.BILIBILI, feed.title)
+            .contain(historyId)
             .then(isContain => {
                 if (! isContain) {
                     let caption
@@ -22,8 +28,8 @@ export function task() {
                     } else {
                         caption = `${feed.author}：${feed.title}`
                     }
-                    send_photo_to_telegram(token.bilibili, chat_id.me, feed.pic, caption)
-                    History.insert(History.Type.BILIBILI, feed.title)
+                    sendPhotoMsgToRabbitMQ(token.bilibili, chat_id.me, feed.pic, caption, historyId)
+                    History.insert(historyId)
                 }
             })
         })

@@ -1,6 +1,6 @@
 import * as biquge from '../reptiles/biquge'
 import { History } from '../modules/mysql'
-import { send_message_to_telegram } from '../modules/rabbitmq-telegram'
+import { sendMessageToRabbitMQ } from '../modules/rabbitmq-telegram'
 
 import { token, chat_id } from '../assets/auth_telegram'
 import { followingNovels } from '../assets/biquge'
@@ -20,13 +20,19 @@ export function task() {
         biquge.getRecentChapters(novel).then((chapter_list) => {
 
             chapter_list.forEach(chapter => {
+
+                const historyId: History.Identifier = {
+                    type: History.Type.BIQUGE, 
+                    content: chapter.title
+                }
+
                 History
-                .contain(History.Type.BIQUGE, chapter.title)
+                .contain(historyId)
                 .then(isContain => {
                     if (! isContain) {
                         let text = `*《${novel.name}》*更新了新章节\n[${chapter.title}](${chapter.link})`
-                        send_message_to_telegram(token.biquge, chat_id.me, text)
-                        History.insert(History.Type.BIQUGE, chapter.title)
+                        sendMessageToRabbitMQ(token.biquge, chat_id.me, text, historyId)
+                        History.insert(historyId)
                     }
                 })
             })

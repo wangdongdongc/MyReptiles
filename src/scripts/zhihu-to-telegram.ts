@@ -1,6 +1,6 @@
 import * as zhihu from '../reptiles/zhihu'
 import { History } from '../modules/mysql'
-import { send_message_to_telegram } from '../modules/rabbitmq-telegram'
+import { sendMessageToRabbitMQ } from '../modules/rabbitmq-telegram'
 
 import { token, chat_id } from '../assets/auth_telegram'
 import { followingUsers } from '../assets/zhihu'
@@ -38,13 +38,19 @@ function zhihu_to_telegram(user: zhihu.User) {
             (<ZhihuActivityWithIdentifier>act).identifier = `${act.authorName}:${act.title}`
             return act as ZhihuActivityWithIdentifier
         }).forEach(act => {
+
+            const historyId: History.Identifier = { 
+                type: History.Type.ZHIHU,
+                content: act.identifier
+            }
+
             History
-            .contain(History.Type.ZHIHU, act.identifier)
+            .contain(historyId)
             .then(isContain => {
                 if (!isContain && act.meta !== '关注了问题') {
                     let text = `*${user.name}* _${act.meta}_\n*${act.title}*\n${act.link}\n*${act.authorName}*\n${act.content}`
-                    send_message_to_telegram(token.zhihu, chat_id.me, text)
-                    History.insert(History.Type.ZHIHU, act.identifier)
+                    sendMessageToRabbitMQ(token.zhihu, chat_id.me, text, historyId)
+                    History.insert(historyId)
                 }
             })
         })
