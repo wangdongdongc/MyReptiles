@@ -7,7 +7,7 @@ import { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME } from '../assets/auth_mysql'
  * MySQL Connection Pool
  */
 const pool = mysql.createPool({
-    connectionLimit: 3,
+    connectionLimit: 20,
     host: DB_HOST,
     user: DB_USER,
     password: DB_PASSWORD,
@@ -20,11 +20,11 @@ export namespace History {
 
     /** 记录的状态 */
     export enum Status {
-        /** 未知 */
+        /** 状态未知 */
         UNKNOWN = 'unknown',
         /** 记录已发送(至Telegram) */
         SOLVED = 'solved'
-        /** 记录未发送 */,
+        /** 记录未成功发送(至Telegram) */,
         UN_SOLVED = 'unsolved',
     }
 

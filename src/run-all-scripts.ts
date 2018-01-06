@@ -14,3 +14,7 @@ yinwang.task()
 zhihu.task()
 bilibili.task()
 tsdm.task()
+
+const MINUTE = 1000 * 60
+/** 一段时间后关闭脚本 */
+setTimeout(process.exit(0), 3 * MINUTE)
