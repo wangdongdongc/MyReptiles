@@ -15,7 +15,8 @@ export function task() {
 
             const historyId: History.Identifier = {
                 type: History.Type.YINWANG,
-                content: blog.title
+                content: blog.title,
+                link: blog.url
             }
 
             History.contain(historyId).then(isContain => {

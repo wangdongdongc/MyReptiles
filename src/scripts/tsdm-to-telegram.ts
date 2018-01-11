@@ -17,7 +17,8 @@ export function task() {
 
             const historyId: History.Identifier = {
                 type: History.Type.TSDM,
-                content: novel.title
+                content: novel.title,
+                link: novel.link
             }
 
             History.contain(historyId).then(isContain => {

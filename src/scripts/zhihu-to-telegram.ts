@@ -42,7 +42,8 @@ function zhihu_to_telegram(user: zhihu.User) {
 
             const historyId: History.Identifier = {
                 type: History.Type.ZHIHU,
-                content: act.identifier
+                content: act.identifier,
+                link: act.link
             }
 
             History.contain(historyId).then(isContain => {

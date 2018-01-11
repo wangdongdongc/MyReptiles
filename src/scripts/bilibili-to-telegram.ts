@@ -15,7 +15,8 @@ export function task() {
 
             const historyId: History.Identifier = {
                 type: History.Type.BILIBILI,
-                content: feed.title
+                content: feed.title,
+                link: feed.link
             }
 
             History.contain(historyId).then(isContain => {

@@ -41,13 +41,21 @@ export namespace History {
     /** 标识符用于定位到数据库里的一条历史记录 */
     export interface Identifier {
         type: Type,
-        content: string
+        content: string,
+        /** 超链接（如果有的话） */
+        link?: string
     }
 
     export function insert(id: Identifier): Promise<Boolean> {
         return new Promise<Boolean>((resolve, reject) => {
+            let sql
+            if (id.link) {
+                sql = `INSERT INTO ${TABLE}(type, content, link) VALUE ('${id.type}', '${id.content}', '${id.link}')`
+            } else {
+                sql = `INSERT INTO ${TABLE}(type, content) VALUE ('${id.type}', '${id.content}')`
+            }
             pool.query(
-                `INSERT INTO ${TABLE}(type, content) VALUE ('${id.type}', '${id.content}')`
+                sql
                 , (err, _) => {
                     if (err) resolve(false)
                     else resolve(true)
@@ -71,7 +79,10 @@ export namespace History {
             pool.query(
                 `SELECT * FROM ${TABLE} WHERE type='${id.type}' AND content='${id.content}'`
                 , (err, result) => {
-                    if (err) reject(err)
+                    if (err) {
+                        reject(err)
+                        return
+                    }
                     if (result.length && result.length > 0) resolve(true)
                     else resolve(false)
                 })

@@ -23,7 +23,8 @@ export function task() {
 
                 const historyId: History.Identifier = {
                     type: History.Type.BIQUGE,
-                    content: chapter.title
+                    content: chapter.title,
+                    link: chapter.link
                 }
 
                 History.contain(historyId).then(isContain => {

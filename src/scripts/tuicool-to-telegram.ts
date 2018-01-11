@@ -15,7 +15,8 @@ export function task() {
 
             const historyId: History.Identifier = {
                 type: History.Type.TUICOOL,
-                content: article.title
+                content: article.title,
+                link: article.link
             }
 
             History.contain(historyId).then(isContain => {
