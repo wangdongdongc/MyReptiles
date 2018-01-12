@@ -23,7 +23,7 @@ export function task() {
 
                 const historyId: History.Identifier = {
                     type: History.Type.BIQUGE,
-                    content: chapter.title,
+                    content: `${novel.name}:${chapter.title}`,
                     link: chapter.link
                 }
 

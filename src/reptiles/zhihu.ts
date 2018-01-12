@@ -150,10 +150,10 @@ export function getRecentActivities(user: User): Promise<Activity[]> {
                     // 获取 item 数据
                     let act: Activity = {
                         meta: node('div.zm-profile-activity-page-item-main').text(),
-                        title: null,     // Todo
-                        link: null,     // Todo
-                        authorName: null, // Todo
-                        content: node('div.zh-summary.summary.clearfix').text()     // Todo
+                        title: null,
+                        link: null,
+                        authorName: null,
+                        content: node('div.zh-summary.summary.clearfix').text()
                     }
 
                     act.meta = removeLineBreak(act.meta)

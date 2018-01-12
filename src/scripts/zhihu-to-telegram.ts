@@ -11,7 +11,7 @@ import {followingUsers} from '../assets/zhihu'
  */
 export function task() {
     // 每隔 1s 进行爬取一个用户的动态
-    let intervalTime = 1000
+    const intervalTime = 1000
     /* ms */
     let i = 0
     let handler = setInterval(() => {

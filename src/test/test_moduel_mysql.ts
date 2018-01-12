@@ -1,6 +1,6 @@
 import 'should'
 
-import { History } from '../modules/mysql';
+import { History } from '../modules/mysql'
 
 const TEST_TYPE: History.Type = History.Type.BILIBILI
 const TEST_CONTENT: string = new Date().toString()
