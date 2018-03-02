@@ -1,6 +1,7 @@
 .idea/
 build/
 src/assets/
+src/test.ts
 node_modules/
 history/
 npm-debug.log
