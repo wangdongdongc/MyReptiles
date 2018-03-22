@@ -132,15 +132,13 @@ export function getRecentActivities(user: User): Promise<Activity[]> {
                 return
             }
             // 验证页面是否正确
-            if (res.text.indexOf(user.identifier) == -1) {
-
+            if (res.status !== 200) {
                 reject(new Error(`知乎动态 @${user.name}: 未获取正确的HTML`))
-            }
-            else {
+            } else {
                 let act_list: Activity[] = []
                 // 解析 HTML 获取数据
                 let $ = cheerio.load(res.text)
-                let list = $('div.zm-profile-section-item.zm-item.clearfix')
+                let list = $('div.zm-profile-section-item')
 
                 for (let i = 0; i < list.length; i++) {
                     // for each item
