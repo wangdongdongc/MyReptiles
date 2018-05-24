@@ -37,6 +37,17 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "reptile: zhihu",
+            "program": "${workspaceRoot}/src/reptiles/zhihu.ts",
+            "cwd": "${workspaceRoot}",
+            "outFiles": [
+                "${workspaceRoot}/build/reptiles/*"
+            ],
+            "args": []
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "run-all-scripts",
             "program": "${workspaceRoot}/src/run-all-scripts.ts",
             "cwd": "${workspaceRoot}",

@@ -1,7 +1,9 @@
 import * as superagent from 'superagent'
 import * as cheerio from 'cheerio'
+import * as puppeteer from 'puppeteer'    
 
 import { http_header } from '../assets/auth_zhihu'
+
 
 interface ActType {
     '赞了X中文章': RegExp
@@ -124,99 +126,118 @@ function handleQuestion(node: CheerioStatic, act: Activity, regx: RegExp) {
  * @param {User} user
  */
 export function getRecentActivities(user: User): Promise<Activity[]> {
-    return new Promise<Activity[]>((resolve, reject) => {
+    return new Promise<Activity[]>(async (resolve, reject) => {
 
-        superagent.get(user.activity_page).set(http_header).end((err, res) => {
-            if (err) {
-                reject(err)
-                return
-            }
-            // 验证页面是否正确
-            if (res.status !== 200) {
-                reject(new Error(`知乎动态 @${user.name}: 未获取正确的HTML`))
-            } else {
-                let act_list: Activity[] = []
-                // 解析 HTML 获取数据
-                let $ = cheerio.load(res.text)
-                let list = $('div.zm-profile-section-item')
+        const browser = await puppeteer.launch();
+        const page = await browser.newPage();
+        await page.goto(user.activity_page);
 
-                for (let i = 0; i < list.length; i++) {
-                    // for each item
-                    let item = list[i]
+        page.on('console', msg => console.log('[CHROME] ', msg.text()));
 
-                    let node: CheerioStatic = cheerio.load(item)
-                    // 获取 item 数据
-                    let act: Activity = {
-                        meta: node('div.zm-profile-activity-page-item-main').text(),
-                        title: null,
-                        link: null,
-                        authorName: null,
-                        content: node('div.zh-summary.summary.clearfix').text()
-                    }
+        let elementList: HTMLElement[] = await page.$$eval('.List-item', items => {
+            let elems = []
+            items.forEach(element => {
+                console.log(element.textContent)
+                elems.push(element)
+            });
+            return elems;
+        });
 
-                    act.meta = removeLineBreak(act.meta)
-                    act.content = removeLineBreak(act.content)
+        await browser.close();
 
-                    // 处理 meta (RegExp)
-                    if (TYPE.赞了X中文章.exec(act.meta) != null) {
-                        handleArticle(node, act, TYPE.赞了X中文章)
-                    }
-                    else if (TYPE.赞了文章.exec(act.meta) != null) {
-                        handleArticle(node, act, TYPE.赞了文章)
-                    }
-                    else if (TYPE.在X中发布了文章.exec(act.meta) != null) {
-                        handleArticle(node, act, TYPE.在X中发布了文章)
-                    }
-                    else if (TYPE.赞同了回答.exec(act.meta) != null) {
-                        handleAnswer(node, act, TYPE.赞同了回答)
-                    }
-                    else if (TYPE.回答了问题.exec(act.meta) != null) {
-                        handleAnswer(node, act, TYPE.回答了问题)
-                    }
-                    else if (TYPE.在X中收藏了回答.exec(act.meta) != null) {
-                        handleAnswer(node, act, TYPE.在X中收藏了回答)
-                    }
-                    else if (TYPE.关注了问题.exec(act.meta) != null) {
-                        handleQuestion(node, act, TYPE.关注了问题)
-                    }
-                    else {
-                        act.meta = null
-                    }
+        resolve([])
 
-                    // 去除 内容 "显示全部"
-                    if (act.content.endsWith('显示全部')) {
-                        act.content = act.content.substring(0, act.content.length - 4).trim()
-                    }
+        // superagent.get(user.activity_page).set(http_header).end((err, res) => {
+        //     if (err) {
+        //         reject(err)
+        //         return
+        //     }
+        //     // 验证页面是否正确
+        //     if (res.status !== 200) {
+        //         reject(new Error(`知乎动态 @${user.name}: 未获取正确的HTML`))
+        //     } else {
+        //         let act_list: Activity[] = []
+        //         // 解析 HTML 获取数据
+        //         let $ = cheerio.load(res.text)
+        //         let list = $('div.List-item')
 
-                    // 去除 内容 "发布于"
-                    if (act.content.lastIndexOf('发布于') != -1 &&
-                        act.content.length - act.content.lastIndexOf('发布于') == 9) {
-                        act.content = act.content.substring(0, act.content.lastIndexOf('发布于'))
-                    }
-                    // 去除 内容 "发布于 昨天"
-                    if (act.content.lastIndexOf('发布于 昨天') != -1 &&
-                        act.content.length - act.content.lastIndexOf('发布于 昨天') == 12) {
-                        act.content = act.content.substring(0, act.content.lastIndexOf('发布于 昨天'))
-                    }
-                    // 去除 内容 "编辑于"
-                    if (act.content.lastIndexOf('编辑于') != -1 &&
-                        act.content.length - act.content.lastIndexOf('编辑于') == 9) {
-                        act.content = act.content.substring(0, act.content.lastIndexOf('编辑于'))
-                    }
-                    // 去除 内容 "编辑于 昨天"
-                    if (act.content.lastIndexOf('编辑于 昨天') != -1 &&
-                        act.content.length - act.content.lastIndexOf('编辑于 昨天') == 12) {
-                        act.content = act.content.substring(0, act.content.lastIndexOf('编辑于 昨天'))
-                    }
+        //         for (let i = 0; i < list.length; i++) {
+        //             // for each item
+        //             let item = list[i]
 
-                    if (act.meta != null) {
-                        act_list.push(act)
-                    }
-                }
+        //             let node: CheerioStatic = cheerio.load(item)
+        //             // 获取 item 数据
+        //             let act: Activity = {
+        //                 meta: node('div.ActivityItem-meta').text(),
+        //                 title: null,
+        //                 link: null,
+        //                 authorName: null,
+        //                 content: node('span.RichText.CopyrightRichText-richText').text()
+        //             }
 
-                resolve(act_list)
-            }
-        }) // end superagent
+        //             act.meta = removeLineBreak(act.meta)
+        //             act.content = removeLineBreak(act.content)
+
+        //             // 处理 meta (RegExp)
+        //             if (TYPE.赞了X中文章.exec(act.meta) != null) {
+        //                 handleArticle(node, act, TYPE.赞了X中文章)
+        //             }
+        //             else if (TYPE.赞了文章.exec(act.meta) != null) {
+        //                 handleArticle(node, act, TYPE.赞了文章)
+        //             }
+        //             else if (TYPE.在X中发布了文章.exec(act.meta) != null) {
+        //                 handleArticle(node, act, TYPE.在X中发布了文章)
+        //             }
+        //             else if (TYPE.赞同了回答.exec(act.meta) != null) {
+        //                 handleAnswer(node, act, TYPE.赞同了回答)
+        //             }
+        //             else if (TYPE.回答了问题.exec(act.meta) != null) {
+        //                 handleAnswer(node, act, TYPE.回答了问题)
+        //             }
+        //             else if (TYPE.在X中收藏了回答.exec(act.meta) != null) {
+        //                 handleAnswer(node, act, TYPE.在X中收藏了回答)
+        //             }
+        //             else if (TYPE.关注了问题.exec(act.meta) != null) {
+        //                 handleQuestion(node, act, TYPE.关注了问题)
+        //             }
+        //             else {
+        //                 act.meta = null
+        //             }
+
+        //             // 去除 内容 "显示全部"
+        //             if (act.content.endsWith('显示全部')) {
+        //                 act.content = act.content.substring(0, act.content.length - 4).trim()
+        //             }
+
+        //             // 去除 内容 "发布于"
+        //             if (act.content.lastIndexOf('发布于') != -1 &&
+        //                 act.content.length - act.content.lastIndexOf('发布于') == 9) {
+        //                 act.content = act.content.substring(0, act.content.lastIndexOf('发布于'))
+        //             }
+        //             // 去除 内容 "发布于 昨天"
+        //             if (act.content.lastIndexOf('发布于 昨天') != -1 &&
+        //                 act.content.length - act.content.lastIndexOf('发布于 昨天') == 12) {
+        //                 act.content = act.content.substring(0, act.content.lastIndexOf('发布于 昨天'))
+        //             }
+        //             // 去除 内容 "编辑于"
+        //             if (act.content.lastIndexOf('编辑于') != -1 &&
+        //                 act.content.length - act.content.lastIndexOf('编辑于') == 9) {
+        //                 act.content = act.content.substring(0, act.content.lastIndexOf('编辑于'))
+        //             }
+        //             // 去除 内容 "编辑于 昨天"
+        //             if (act.content.lastIndexOf('编辑于 昨天') != -1 &&
+        //                 act.content.length - act.content.lastIndexOf('编辑于 昨天') == 12) {
+        //                 act.content = act.content.substring(0, act.content.lastIndexOf('编辑于 昨天'))
+        //             }
+
+        //             if (act.meta != null) {
+        //                 act_list.push(act)
+        //             }
+        //         }
+
+        //         resolve(act_list)
+        //     }
+        // }) // end superagent
     })
 }
 
@@ -235,6 +256,6 @@ if (process.argv.length >= 2 &&
         historyFile: 'test_zhihu_reptile.json'
     }
     getRecentActivities(testUser).then((activities) => {
-        console.log(`END`)
+        console.log(`共爬取 ${activities.length} 条记录`)
     })
 }

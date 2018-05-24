@@ -118,6 +118,8 @@ export function sendMail(mail: Mail, mailToken: string = token.mail) {
         'parse_mode': MessageMode.markdown
     }
     sendMessage(mailToken, message, (err, res) => {
-        if (err) { throw err }
+        if (err) {
+            console.error(err);
+        }
     })
 }
