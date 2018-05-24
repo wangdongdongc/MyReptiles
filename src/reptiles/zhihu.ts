@@ -128,116 +128,97 @@ function handleQuestion(node: CheerioStatic, act: Activity, regx: RegExp) {
 export function getRecentActivities(user: User): Promise<Activity[]> {
     return new Promise<Activity[]>(async (resolve, reject) => {
 
-        const browser = await puppeteer.launch();
-        const page = await browser.newPage();
-        await page.goto(user.activity_page);
+        superagent.get(user.activity_page).set(http_header).end((err, res) => {
+            if (err) {
+                reject(err)
+                return
+            }
+            // 验证页面是否正确
+            if (res.status !== 200) {
+                reject(new Error(`知乎动态 @${user.name}: 未获取正确的HTML`))
+            } else {
+                let act_list: Activity[] = []
+                // 解析 HTML 获取数据
+                let $ = cheerio.load(res.text)
+                let list = $('div.List-item')
 
-        page.on('console', msg => console.log('[CHROME] ', msg.text()));
+                for (let i = 0; i < list.length; i++) {
+                    // for each item
+                    let item = list[i]
 
-        let elementList: HTMLElement[] = await page.$$eval('.List-item', items => {
-            let elems = []
-            items.forEach(element => {
-                console.log(element.textContent)
-                elems.push(element)
-            });
-            return elems;
-        });
+                    let node: CheerioStatic = cheerio.load(item)
+                    // 获取 item 数据
+                    let act: Activity = {
+                        meta: node('div.ActivityItem-meta').text(),
+                        title: null,
+                        link: null,
+                        authorName: null,
+                        content: node('span.RichText.CopyrightRichText-richText').text()
+                    }
 
-        await browser.close();
+                    act.meta = removeLineBreak(act.meta)
+                    act.content = removeLineBreak(act.content)
 
-        resolve([])
+                    // 处理 meta (RegExp)
+                    if (TYPE.赞了X中文章.exec(act.meta) != null) {
+                        handleArticle(node, act, TYPE.赞了X中文章)
+                    }
+                    else if (TYPE.赞了文章.exec(act.meta) != null) {
+                        handleArticle(node, act, TYPE.赞了文章)
+                    }
+                    else if (TYPE.在X中发布了文章.exec(act.meta) != null) {
+                        handleArticle(node, act, TYPE.在X中发布了文章)
+                    }
+                    else if (TYPE.赞同了回答.exec(act.meta) != null) {
+                        handleAnswer(node, act, TYPE.赞同了回答)
+                    }
+                    else if (TYPE.回答了问题.exec(act.meta) != null) {
+                        handleAnswer(node, act, TYPE.回答了问题)
+                    }
+                    else if (TYPE.在X中收藏了回答.exec(act.meta) != null) {
+                        handleAnswer(node, act, TYPE.在X中收藏了回答)
+                    }
+                    else if (TYPE.关注了问题.exec(act.meta) != null) {
+                        handleQuestion(node, act, TYPE.关注了问题)
+                    }
+                    else {
+                        act.meta = null
+                    }
 
-        // superagent.get(user.activity_page).set(http_header).end((err, res) => {
-        //     if (err) {
-        //         reject(err)
-        //         return
-        //     }
-        //     // 验证页面是否正确
-        //     if (res.status !== 200) {
-        //         reject(new Error(`知乎动态 @${user.name}: 未获取正确的HTML`))
-        //     } else {
-        //         let act_list: Activity[] = []
-        //         // 解析 HTML 获取数据
-        //         let $ = cheerio.load(res.text)
-        //         let list = $('div.List-item')
+                    // 去除 内容 "显示全部"
+                    if (act.content.endsWith('显示全部')) {
+                        act.content = act.content.substring(0, act.content.length - 4).trim()
+                    }
 
-        //         for (let i = 0; i < list.length; i++) {
-        //             // for each item
-        //             let item = list[i]
+                    // 去除 内容 "发布于"
+                    if (act.content.lastIndexOf('发布于') != -1 &&
+                        act.content.length - act.content.lastIndexOf('发布于') == 9) {
+                        act.content = act.content.substring(0, act.content.lastIndexOf('发布于'))
+                    }
+                    // 去除 内容 "发布于 昨天"
+                    if (act.content.lastIndexOf('发布于 昨天') != -1 &&
+                        act.content.length - act.content.lastIndexOf('发布于 昨天') == 12) {
+                        act.content = act.content.substring(0, act.content.lastIndexOf('发布于 昨天'))
+                    }
+                    // 去除 内容 "编辑于"
+                    if (act.content.lastIndexOf('编辑于') != -1 &&
+                        act.content.length - act.content.lastIndexOf('编辑于') == 9) {
+                        act.content = act.content.substring(0, act.content.lastIndexOf('编辑于'))
+                    }
+                    // 去除 内容 "编辑于 昨天"
+                    if (act.content.lastIndexOf('编辑于 昨天') != -1 &&
+                        act.content.length - act.content.lastIndexOf('编辑于 昨天') == 12) {
+                        act.content = act.content.substring(0, act.content.lastIndexOf('编辑于 昨天'))
+                    }
 
-        //             let node: CheerioStatic = cheerio.load(item)
-        //             // 获取 item 数据
-        //             let act: Activity = {
-        //                 meta: node('div.ActivityItem-meta').text(),
-        //                 title: null,
-        //                 link: null,
-        //                 authorName: null,
-        //                 content: node('span.RichText.CopyrightRichText-richText').text()
-        //             }
+                    if (act.meta != null) {
+                        act_list.push(act)
+                    }
+                }
 
-        //             act.meta = removeLineBreak(act.meta)
-        //             act.content = removeLineBreak(act.content)
-
-        //             // 处理 meta (RegExp)
-        //             if (TYPE.赞了X中文章.exec(act.meta) != null) {
-        //                 handleArticle(node, act, TYPE.赞了X中文章)
-        //             }
-        //             else if (TYPE.赞了文章.exec(act.meta) != null) {
-        //                 handleArticle(node, act, TYPE.赞了文章)
-        //             }
-        //             else if (TYPE.在X中发布了文章.exec(act.meta) != null) {
-        //                 handleArticle(node, act, TYPE.在X中发布了文章)
-        //             }
-        //             else if (TYPE.赞同了回答.exec(act.meta) != null) {
-        //                 handleAnswer(node, act, TYPE.赞同了回答)
-        //             }
-        //             else if (TYPE.回答了问题.exec(act.meta) != null) {
-        //                 handleAnswer(node, act, TYPE.回答了问题)
-        //             }
-        //             else if (TYPE.在X中收藏了回答.exec(act.meta) != null) {
-        //                 handleAnswer(node, act, TYPE.在X中收藏了回答)
-        //             }
-        //             else if (TYPE.关注了问题.exec(act.meta) != null) {
-        //                 handleQuestion(node, act, TYPE.关注了问题)
-        //             }
-        //             else {
-        //                 act.meta = null
-        //             }
-
-        //             // 去除 内容 "显示全部"
-        //             if (act.content.endsWith('显示全部')) {
-        //                 act.content = act.content.substring(0, act.content.length - 4).trim()
-        //             }
-
-        //             // 去除 内容 "发布于"
-        //             if (act.content.lastIndexOf('发布于') != -1 &&
-        //                 act.content.length - act.content.lastIndexOf('发布于') == 9) {
-        //                 act.content = act.content.substring(0, act.content.lastIndexOf('发布于'))
-        //             }
-        //             // 去除 内容 "发布于 昨天"
-        //             if (act.content.lastIndexOf('发布于 昨天') != -1 &&
-        //                 act.content.length - act.content.lastIndexOf('发布于 昨天') == 12) {
-        //                 act.content = act.content.substring(0, act.content.lastIndexOf('发布于 昨天'))
-        //             }
-        //             // 去除 内容 "编辑于"
-        //             if (act.content.lastIndexOf('编辑于') != -1 &&
-        //                 act.content.length - act.content.lastIndexOf('编辑于') == 9) {
-        //                 act.content = act.content.substring(0, act.content.lastIndexOf('编辑于'))
-        //             }
-        //             // 去除 内容 "编辑于 昨天"
-        //             if (act.content.lastIndexOf('编辑于 昨天') != -1 &&
-        //                 act.content.length - act.content.lastIndexOf('编辑于 昨天') == 12) {
-        //                 act.content = act.content.substring(0, act.content.lastIndexOf('编辑于 昨天'))
-        //             }
-
-        //             if (act.meta != null) {
-        //                 act_list.push(act)
-        //             }
-        //         }
-
-        //         resolve(act_list)
-        //     }
-        // }) // end superagent
+                resolve(act_list)
+            }
+        }) // end superagent
     })
 }
 
